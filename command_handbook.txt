@@ -1,0 +1,51 @@
+1. Creating a project: 
+$django-admin startproject <your project name>
+
+2. Let’s verify your Django project works. 
+   Change into the outer mysite directory, 
+   if you haven’t already, and run the following commands:
+$python manage.py runserver
+
+3. Creating the app
+$python manage.py startapp <app name>
+
+4. Database setup
+    Some of these applications make use of at least one database table, though, 
+    so we need to create the tables in the database before we can use them. 
+    To do that, run the following command:
+$python manage.py migrate
+
+5. Creating Virtual Environment on Python
+$python -m venv <your virtual vnvironment name>
+
+6. On Windows, run to active environment:
+$<your virtual vnvironment name>\Scripts\activate.bat
+OR
+$<your virtual vnvironment name>\Scripts\activate
+
+7. Convert Python Script to .exe File
+$pyinstaller --onefile -w 'filename.py'
+
+8. Pyinstaller option: What to generate, 
+    Create a one-folder bundle containing an executable (default)
+$pyinstaller --onedir --noconsole myUI_01.py
+OR
+$pyinstaller --onedir -w myUI_01.py
+$pyinstaller installerUI_01.py --name installer
+
+9. Add icon
+$pyinstaller --onedir -w --icon=app.ico myUI_01.py
+
+10. Add icon folder to project file after build
+Edit in spec file:
+
+a = Analysis(
+    ['myUI_01.py'],
+    pathex=[],
+    binaries=[],
+    datas=[('dist/icon', 'icon')],
+    ....
+)
+
+and use command below to build
+$pyinstaller --onedir -w --add-data=dist/icon;icon --icon="E:\pnnhien\django\my_app_venv_01\app\dist\icon\icon.ico" myUI_01.py
