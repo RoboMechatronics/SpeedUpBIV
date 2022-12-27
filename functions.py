@@ -154,34 +154,30 @@ def CAL_MIN_PITCH(X, Y):
     P = np.stack((X_sort, Y_sort), axis=1)
 
     N = P.shape[0]
-    print(N)
+
     dist_list = []
-    dist_ = 0
+    disance = 0
+    
+    for indexi, i in enumerate(P):    
+        if indexi == 0:                     disance = dist(i, i+1) 
+        if (indexi > 0 and indexi < N-1):   disance = min(dist(i, i+1), dist(i-1, i))
+        if indexi == N-1:                   disance = dist(i-1, i)
 
-    for i in range(N):    
-        if i == 0:              dist_ = dist(P[i], P[i+1]) 
-        if (i > 0 and i < N-1): dist_ = min(dist(P[i], P[i+1]), dist(P[i-1], P[i]))
-        if i == N-1:            dist_ = dist(P[i-1], P[i])
-
-        x_max = P[i][0] + dist_
-        x_min = P[i][0] + dist_
-        y_max = P[i][1] + dist_
-        y_min = P[i][1] - dist_
+        x_max = i[0] + disance
+        x_min = i[0] - disance
+        y_max = i[1] + disance
+        y_min = i[1] - disance
 
         distance_list = []
-        distance = 0
-        for j in range(N):
-            if P[j][0] >= x_min and P[j][0] <= x_max and P[j][1] >= y_min and P[j][1] <= y_max and j != i:
-                distance = dist(P[i], P[j])
-                distance_list.append(distance)
-                print('j=',j)
-        
+        for indexj, j in enumerate(P):
+            if (j[0] >= x_min and j[0] <= x_max and j[1] >= y_min and j[1] <= y_max and indexj != indexi):
+                distance_list.append(dist(i, j))
+            else:
+                continue
         dist_list.append(min(distance_list))
-    print(P)
+    
     return min(dist_list)
-    # return d1_arr.min()
-#  End of CAL_MIN_PITCH function
-
+#  End of CAL_MIN_PITCH functio
 def GET_FILE(): # No input
     filter_ = "Excel File (*.xlsx *xlsm)"
     file_path = QFileDialog.getOpenFileName(caption='selectFile',
