@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QFileDialog
 from math import *
 import os
 import numpy as np
+import pandas as pd
 
 def GET_XY_FROM_MOUSE(Table):
     # Get cells value has been selected
@@ -139,7 +140,7 @@ def CAL_MIN_PITCH(X, Y):
     # Check X array and Y array, return -1 if they has only 1 number
     if (X) == 1 or len(Y) == 1: 
         return -1
-
+    
     # Convert X and Y list to array type
     X_arr, Y_arr = np.array(X), np.array(Y)
 
@@ -191,14 +192,18 @@ def CAL_MIN_PITCH(X, Y):
         min_distance2_list.append(min_distance2)   # min distance of every groups
     
     n_i = len(groups_list)
-    for i in range(n_i):
+    a, b = [], []
+    for i in range(n_i-1):
         for j in range(i+1, n_i):
-            for k in range(len(groups_list[i])):
-                for m in range(len(groups_list[j])):
-                    a = (groups_list[i][k][0] + groups_list[j][m][0])**2
-                    b = (groups_list[i][k][1] + groups_list[j][m][1])**2
-   
-    return 0
+            a = [[(groups_list[i][k][0] + groups_list[j][m][0])**2 for m in range(len(groups_list[j]))] for k in range(len(groups_list[i]))]
+    for i in range(n_i-1):
+        for j in range(i+1, n_i):
+            b = [[(groups_list[i][k][1] + groups_list[j][m][1])**2 for m in range(len(groups_list[j]))] for k in range(len(groups_list[i]))] 
+    
+    print((a))
+    print((b))
+    return min(min_distance2_list)
+
 #  End of CAL_MIN_PITCH functions
 
 def GET_FILE(): # No input
