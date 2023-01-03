@@ -613,8 +613,7 @@ class MainWindow(QMainWindow):
         # Calculate min pitch
         self.status.showMessage("Ready!")
         MIN_PITCH["VALUE#"] = CAL_MIN_PITCH(self.X, self.Y)
-        # self.status.showMessage("Min pitch's calculated within " + str(round(dt,1)) + " ms")
-        
+            
         if MIN_PITCH["VALUE#"]== -1:
             MIN_PITCH["VALUE"].setText('Only 1 point')
         else:

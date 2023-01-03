@@ -142,42 +142,65 @@ def CAL_MIN_PITCH(X, Y):
 
     # Convert X and Y list to array type
     X_arr, Y_arr = np.array(X), np.array(Y)
-    X_sort, Y_sort = [],[]
 
-    index = np.lexsort((Y_arr, X_arr))
-
-    X_sort = [X[i] for i in index]
-    Y_sort = [Y[i] for i in index]
-    X_sort = np.array(X_sort)
-    Y_sort = np.array(Y_sort)
-
-    P = np.stack((X_sort, Y_sort), axis=1)
-
+    P = np.stack((X_arr, Y_arr), axis=1)
     N = P.shape[0]
 
-    dist_list = []
-    disance = 0
-    
-    for indexi, i in enumerate(P):    
-        if indexi == 0:                     disance = dist(i, i+1) 
-        if (indexi > 0 and indexi < N-1):   disance = min(dist(i, i+1), dist(i-1, i))
-        if indexi == N-1:                   disance = dist(i-1, i)
+    groups = 1
+    if N > 2000 and N <= 5000:
+        groups = 3
+    if N > 5000 and N <= 20000:
+        groups = 8
+    if N > 20000:
+        groups = 30
 
-        x_max = i[0] + disance
-        x_min = i[0] - disance
-        y_max = i[1] + disance
-        y_min = i[1] - disance
+    n = N//groups
+    n_rest = N%groups
 
-        distance_list = []
-        for indexj, j in enumerate(P):
-            if (j[0] >= x_min and j[0] <= x_max and j[1] >= y_min and j[1] <= y_max and indexj != indexi):
-                distance_list.append(dist(i, j))
-            else:
-                continue
-        dist_list.append(min(distance_list))
+    groups_list = []
+    for g in range(groups):
+        sub_list1 = []
+        sub_list1 = [P[g*n+i][:] for i in range(n)]
+        groups_list.append(sub_list1)
     
-    return min(dist_list)
-#  End of CAL_MIN_PITCH functio
+    if n_rest > 0:
+        sub_list = []
+        sub_list = [P[groups*n+i][:] for i in range(n_rest)]
+        groups_list.append(sub_list)
+    
+    min_distance1 = 0
+    min_distance2 = 0
+    min_distance2_list = []
+
+    for P in groups_list:
+        N_in_group = len(P)
+        min_distance1_list = []
+        for i in range(N_in_group-1):
+            list1 = []
+            for j in range(i+1, N_in_group):
+                a       = (P[i][0] - P[j][0])**2
+                b       = (P[i][1] - P[j][1])**2
+                sum_    = a+b
+                min_distance1 = sqrt(sum_)
+                list1.append(min_distance1)
+
+            min_distance1 = min(list1)
+            min_distance1_list.append(min_distance1)
+                
+        min_distance2 = min(min_distance1_list)
+        min_distance2_list.append(min_distance2)   # min distance of every groups
+    
+    n_i = len(groups_list)
+    for i in range(n_i):
+        for j in range(i+1, n_i):
+            for k in range(len(groups_list[i])):
+                for m in range(len(groups_list[j])):
+                    a = (groups_list[i][k][0] + groups_list[j][m][0])**2
+                    b = (groups_list[i][k][1] + groups_list[j][m][1])**2
+   
+    return 0
+#  End of CAL_MIN_PITCH functions
+
 def GET_FILE(): # No input
     filter_ = "Excel File (*.xlsx *xlsm)"
     file_path = QFileDialog.getOpenFileName(caption='selectFile',
