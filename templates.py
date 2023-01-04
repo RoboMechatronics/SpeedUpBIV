@@ -48,7 +48,7 @@ Points = [
         [4,4],  P4
         [5,5],  P5
      i=0,j=i+j+1  i=0, j=j+i+1     i=0,j=2+1=4
-loop i=0: P0P1    P0P2            P0P3            P0P4   P0P5     -->list1-->min1
+loop i=0:        P0P1    P0P2            P0P3            P0P4   P0P5     -->list1-->min1
                 i=1, j=2        
 loop 1:         P1P2            P1P3            P1P4   P1P5     -->list1-->min2
 loop 2:                         P2P3            P2P4   P2P5     -->list1-->min3
