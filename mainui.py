@@ -581,7 +581,6 @@ class MainWindow(QMainWindow):
             self.Tab_content.chart_tab1.addWidget(self.CHART)
             
             self.UPDATE_INFO()
-        return
 
     # class MainWindow(QMainWindow):
     def CALL_CLEAR_CHART(self):
@@ -612,9 +611,9 @@ class MainWindow(QMainWindow):
         
         # Calculate min pitch
         self.status.showMessage("Ready!")
-        MIN_PITCH["VALUE#"] = CAL_MIN_PITCH(self.X, self.Y)
+        MIN_PITCH["VALUE#"], time = CAL_MIN_PITCH(self.X, self.Y)
             
-        if MIN_PITCH["VALUE#"]== -1:
+        if MIN_PITCH["VALUE#"] == -1:
             MIN_PITCH["VALUE"].setText('Only 1 point')
         else:
             if self.XY_INPUT_UNIT == MM_UNIT:
@@ -630,6 +629,9 @@ class MainWindow(QMainWindow):
                 MIN_PITCH["VALUE#"] = round(MIN_PITCH["VALUE#"], 2)
             
             MIN_PITCH["VALUE"].setText(str(MIN_PITCH["VALUE#"]) + " " + UM_UNIT + "  |  " + str(MIN_PITCH_HAS_NC))
+            
+            self.status.showMessage("Calculation within " + str(time) + " ms")
+        
         return
 
     # class MainWindow(QMainWindow):

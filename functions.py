@@ -4,6 +4,8 @@ from math import *
 import os
 import numpy as np
 import pandas as pd
+import time
+from scipy.spatial.distance import euclidean
 
 def GET_XY_FROM_MOUSE(Table):
     # Get cells value has been selected
@@ -135,8 +137,9 @@ def CAL_DIE_SIZE(X, Y):
     # return Size in X and Size in Y
     return (max(X) - min(X)), (max(Y)-min(Y))
 # End of CAL_DIE_SIZE function #
-
+"""
 def CAL_MIN_PITCH(X, Y):
+    start_time = time.time()
     # Check X array and Y array, return -1 if they has only 1 number
     if (X) == 1 or len(Y) == 1: 
         return -1
@@ -151,9 +154,9 @@ def CAL_MIN_PITCH(X, Y):
     if N > 2000 and N <= 5000:
         groups = 3
     if N > 5000 and N <= 20000:
-        groups = 8
+        groups = 10
     if N > 20000:
-        groups = 30
+        groups = 50
 
     n = N//groups
     n_rest = N%groups
@@ -192,19 +195,64 @@ def CAL_MIN_PITCH(X, Y):
         min_distance2_list.append(min_distance2)   # min distance of every groups
     
     n_i = len(groups_list)
-    a, b = [], []
     for i in range(n_i-1):
         for j in range(i+1, n_i):
-            a = [[(groups_list[i][k][0] + groups_list[j][m][0])**2 for m in range(len(groups_list[j]))] for k in range(len(groups_list[i]))]
-    for i in range(n_i-1):
-        for j in range(i+1, n_i):
-            b = [[(groups_list[i][k][1] + groups_list[j][m][1])**2 for m in range(len(groups_list[j]))] for k in range(len(groups_list[i]))] 
+            min_distance2_list = [[euclidean(groups_list[i][k], groups_list[j][m]) for m in range(len(groups_list[j]))] for k in range(len(groups_list[i]))]
     
-    print((a))
-    print((b))
+    end_time = time.time() - start_time
+    print("duration: ", round(end_time*1000, 3), "ms")
     return min(min_distance2_list)
-
+"""
 #  End of CAL_MIN_PITCH functions
+def CAL_MIN_PITCH(X, Y):
+    start_time = time.time()
+    #------------------------------------------------------------------#
+    # Check X array and Y array, return -1 if they has only 1 number
+    if len(X) == 1 or len(Y) == 1: 
+        return -1
+    
+    # Convert X and Y list to array type
+    index = np.lexsort((Y, X))
+
+    P = [(X[i],Y[i]) for i in index]
+    P = np.array(P)
+    N = P.shape[0]
+
+    minX, maxX = min(X), max(X)
+    minY, maxY = min(Y), max(Y)
+    medianX = (maxX - minX)/2 + minX
+
+    r0 = dist(P[0], P[1])
+    for j in range(N):
+        
+        # Initial rectangle, center at P[0]
+        minX = P[j][0] - r0
+        maxX = P[j][0] + r0
+        minY = P[j][1] - r0
+        maxY = P[j][1] + r0
+        
+        around_P0 = []
+        for pnt in P:
+            if pnt[0] == P[j][0] and pnt[1] == P[j][1]:
+                continue
+            elif pnt[0] >= minX and pnt[0] <= maxX and pnt[1] >= minY and pnt[1] <= maxY:
+                around_P0.append(pnt)
+            if dist(P[j], pnt) > r0:
+                break
+
+        temp_list = []
+        
+        for i in around_P0:
+            distance = dist(P[j], i)
+            temp_list.append(distance)
+
+        if temp_list:
+            if r0 >= min(temp_list):
+                r0 = min(temp_list)
+
+    #------------------------------------------------------------------#
+    end_time = time.time() - start_time # unit: seconds
+    return r0, round(end_time*1000, 2) # converted to miliseconds
 
 def GET_FILE(): # No input
     filter_ = "Excel File (*.xlsx *xlsm)"
@@ -271,7 +319,7 @@ def EXPORT_XY_INPUT_FORMAT_FOR_IUA_PLUS_FILE(card_part_number):
             else:
                 list_[i] = "0"
     else:
-        print("Not numeric")
+        # print("Not numeric")
         return
 
     list_.reverse()
