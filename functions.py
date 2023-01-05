@@ -5,7 +5,7 @@ import os
 import numpy as np
 import pandas as pd
 import time
-from scipy.spatial.distance import euclidean
+# from scipy.spatial.distance import euclidean
 
 def GET_XY_FROM_MOUSE(Table):
     # Get cells value has been selected
