@@ -211,48 +211,55 @@ def CAL_MIN_PITCH(X, Y):
     if len(X) == 1 or len(Y) == 1: 
         return -1
     
-    # Convert X and Y list to array type
-    index = np.lexsort((Y, X))
-
-    P = [(X[i],Y[i]) for i in index]
+    index = [i for i in range(len(X))]
+    P = [(X[i], Y[i]) for i in range(len(X))]
     P = np.array(P)
     N = P.shape[0]
 
-    minX, maxX = min(X), max(X)
-    minY, maxY = min(Y), max(Y)
-    medianX = (maxX - minX)/2 + minX
+    # Convert X and Y list to array type
+    index1 = np.lexsort((Y, X))
+    index2 = np.lexsort((X, Y))
+    min_distance_list = []
+    for i in range(N):
+        # i = 2
+        Pi_index1_pos = np.where(index1==i)[0][0]
+        Pi_index2_pos = np.where(index2==i)[0][0]
 
-    r0 = dist(P[0], P[1])
-    for j in range(N):
+        near_Pi = []
+        # these pointns near P0:
+        if Pi_index1_pos == 0:
+            near_Pi.append(index1[Pi_index1_pos+1])
+            near_Pi.append(index1[Pi_index1_pos+2])
+        elif Pi_index1_pos == len(index1)-1:
+            near_Pi.append(index1[Pi_index1_pos-1])
+            near_Pi.append(index1[Pi_index1_pos-2])
+        else:
+            near_Pi.append(index1[Pi_index1_pos-1])
+            near_Pi.append(index1[Pi_index1_pos+1])
+            
+        if Pi_index2_pos == 0:
+            near_Pi.append(index2[Pi_index2_pos+1])
+            near_Pi.append(index2[Pi_index2_pos+2])
+        elif Pi_index2_pos == len(index2)-1:
+            near_Pi.append(index2[Pi_index2_pos-1])
+            near_Pi.append(index2[Pi_index2_pos-2])
+        else:
+            near_Pi.append(index2[Pi_index2_pos-1])
+            near_Pi.append(index2[Pi_index2_pos+1])
+            
+        near_Pi = list(dict.fromkeys(near_Pi))
+        near_Pi.sort()
         
-        # Initial rectangle, center at P[0]
-        minX = P[j][0] - r0
-        maxX = P[j][0] + r0
-        minY = P[j][1] - r0
-        maxY = P[j][1] + r0
-        
-        around_P0 = []
-        for pnt in P:
-            if pnt[0] == P[j][0] and pnt[1] == P[j][1]:
-                continue
-            elif pnt[0] >= minX and pnt[0] <= maxX and pnt[1] >= minY and pnt[1] <= maxY:
-                around_P0.append(pnt)
-            if dist(P[j], pnt) > r0:
-                break
+        distance_list = []
+        for j in near_Pi:
+            distance = dist(P[i], P[j])
+            distance_list.append(distance)
 
-        temp_list = []
-        
-        for i in around_P0:
-            distance = dist(P[j], i)
-            temp_list.append(distance)
-
-        if temp_list:
-            if r0 >= min(temp_list):
-                r0 = min(temp_list)
-
+        min_distance_list.append(min(distance_list))
+    
     #------------------------------------------------------------------#
     end_time = time.time() - start_time # unit: seconds
-    return r0, round(end_time*1000, 2) # converted to miliseconds
+    return min(min_distance_list), round(end_time*1000, 2) # converted to miliseconds
 
 def GET_FILE(): # No input
     filter_ = "Excel File (*.xlsx *xlsm)"
