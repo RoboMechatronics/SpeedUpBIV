@@ -10,7 +10,7 @@ from functions import *
 from xlwt import Workbook
 import openpyxl
 import shutil
-from datetime import datetime
+import time
 
 class MainWindow(QMainWindow):
     def __init__(self, app, new_project, spec=None):
@@ -592,7 +592,6 @@ class MainWindow(QMainWindow):
 
         self.Tab_content.chart_tab1.addWidget(self.toolbar)
         self.Tab_content.chart_tab1.addWidget(self.CHART)
-        return
 
     # class MainWindow(QMainWindow):
     def UPDATE_INFO(self):
@@ -603,7 +602,7 @@ class MainWindow(QMainWindow):
         DIE_SIZE['X'], DIE_SIZE['Y'] = round(DIE_SIZE['X'],2), round(DIE_SIZE['Y'],2)
         # Update Die size info on left panel
         DIE_SIZE["VALUE"].setText("X = " + str(DIE_SIZE["X"]) + "  and  " + \
-                                    "Y = " + str(DIE_SIZE["Y"]) + " " + str(self.XY_INPUT_UNIT))
+                                "Y = " + str(DIE_SIZE["Y"]) + " " + str(self.XY_INPUT_UNIT))
         
         # Reset
         MIN_PITCH["VALUE#"] = 0.0
@@ -611,8 +610,11 @@ class MainWindow(QMainWindow):
         
         # Calculate min pitch
         self.status.showMessage("Ready!")
-        MIN_PITCH["VALUE#"], time = CAL_MIN_PITCH(self.X, self.Y)
-            
+        start_time = time.time()
+        cal_min_distance = ClosestPair(self.X, self.Y)
+        MIN_PITCH["VALUE#"] =  cal_min_distance.min_distance_in_points()
+        end_time = time.time() - start_time
+        
         if MIN_PITCH["VALUE#"] == -1:
             MIN_PITCH["VALUE"].setText('Only 1 point')
         else:
@@ -630,7 +632,7 @@ class MainWindow(QMainWindow):
             
             MIN_PITCH["VALUE"].setText(str(MIN_PITCH["VALUE#"]) + " " + UM_UNIT + "  |  " + str(MIN_PITCH_HAS_NC))
             
-            self.status.showMessage("Calculation within " + str(time) + " ms")
+            self.status.showMessage("Calculation within " + str(round(end_time*1000, 2)) + " ms")
         
         return
 
@@ -703,6 +705,9 @@ class MainWindow(QMainWindow):
 
     # class MainWindow(QMainWindow):
     def GET_DATA(self):
+        # Reset status
+        self.status.showMessage("Ready!")
+        # Create GetInfo class
         self.get_info = GetInfo([self.PAD_NUMBER_POSITION,       self.PAD_NAME_POSITION,             self.DUT_NAME_POSITION,     self.DUT_NAME_FORMAT,
                             self.DUT_NAME_DELIMITER,        self.NC_POSITION,                   self.NC_DENOTE,             self.PAD_SIZE_UNIT,
                             self.Is_PAD_BUMP,               MIN_PAD_SIZE["D"],                  MIN_PAD_SIZE["X"],          MIN_PAD_SIZE["Y"],
@@ -712,7 +717,7 @@ class MainWindow(QMainWindow):
                             KEEP_OUT_TYPE['RECTANGLE_X_SIZE'],  KEEP_OUT_TYPE['RECTANGLE_Y_SIZE'], KEEP_OUT_TYPE['CIRCLE_DIAMETER'], self.CURRENT_UNIT, 
                             self.FREQUENCY_UNIT,            WAFER_PAD['MATERIAL'],              PROBE_PART_NUMBER['PART_NUMBER'],   CARD_PART_NUMBER['VALUE#'],
                             self.DIE_CONFIG])
-
+        # Get info
         self.PAD_NUMBER_POSITION,       self.PAD_NAME_POSITION,             self.DUT_NAME_FORMAT,   self.DUT_NAME_POSITION, \
         self.NC_POSITION,               self.NC_DENOTE,                     CUSTOMER_NAME["NAME"],  DEVICE_NAME["NAME"], \
         SPACE_TRANSFORMER_TYPE["TYPE"], self.KEEP_OUT_TYPE,                 self.KEEP_OUT_UNIT,     self.DUTY_CYCLE_TYPE, \

@@ -137,129 +137,51 @@ def CAL_DIE_SIZE(X, Y):
     # return Size in X and Size in Y
     return (max(X) - min(X)), (max(Y)-min(Y))
 # End of CAL_DIE_SIZE function #
-"""
-def CAL_MIN_PITCH(X, Y):
-    start_time = time.time()
-    # Check X array and Y array, return -1 if they has only 1 number
-    if (X) == 1 or len(Y) == 1: 
-        return -1
-    
-    # Convert X and Y list to array type
-    X_arr, Y_arr = np.array(X), np.array(Y)
 
-    P = np.stack((X_arr, Y_arr), axis=1)
-    N = P.shape[0]
-
-    groups = 1
-    if N > 2000 and N <= 5000:
-        groups = 3
-    if N > 5000 and N <= 20000:
-        groups = 10
-    if N > 20000:
-        groups = 50
-
-    n = N//groups
-    n_rest = N%groups
-
-    groups_list = []
-    for g in range(groups):
-        sub_list1 = []
-        sub_list1 = [P[g*n+i][:] for i in range(n)]
-        groups_list.append(sub_list1)
-    
-    if n_rest > 0:
-        sub_list = []
-        sub_list = [P[groups*n+i][:] for i in range(n_rest)]
-        groups_list.append(sub_list)
-    
-    min_distance1 = 0
-    min_distance2 = 0
-    min_distance2_list = []
-
-    for P in groups_list:
-        N_in_group = len(P)
-        min_distance1_list = []
-        for i in range(N_in_group-1):
-            list1 = []
-            for j in range(i+1, N_in_group):
-                a       = (P[i][0] - P[j][0])**2
-                b       = (P[i][1] - P[j][1])**2
-                sum_    = a+b
-                min_distance1 = sqrt(sum_)
-                list1.append(min_distance1)
-
-            min_distance1 = min(list1)
-            min_distance1_list.append(min_distance1)
-                
-        min_distance2 = min(min_distance1_list)
-        min_distance2_list.append(min_distance2)   # min distance of every groups
-    
-    n_i = len(groups_list)
-    for i in range(n_i-1):
-        for j in range(i+1, n_i):
-            min_distance2_list = [[euclidean(groups_list[i][k], groups_list[j][m]) for m in range(len(groups_list[j]))] for k in range(len(groups_list[i]))]
-    
-    end_time = time.time() - start_time
-    print("duration: ", round(end_time*1000, 3), "ms")
-    return min(min_distance2_list)
-"""
-#  End of CAL_MIN_PITCH functions
-def CAL_MIN_PITCH(X, Y):
-    start_time = time.time()
-    #------------------------------------------------------------------#
-    # Check X array and Y array, return -1 if they has only 1 number
-    if len(X) == 1 or len(Y) == 1: 
-        return -1
-    
-    index = [i for i in range(len(X))]
-    P = [(X[i], Y[i]) for i in range(len(X))]
-    P = np.array(P)
-    N = P.shape[0]
-
-    # Convert X and Y list to array type
-    index1 = np.lexsort((Y, X))
-    index2 = np.lexsort((X, Y))
-    min_distance_list = []
-    for i in range(N):
-        # i = 2
-        Pi_index1_pos = np.where(index1==i)[0][0]
-        Pi_index2_pos = np.where(index2==i)[0][0]
-
-        near_Pi = []
-        # these pointns near P0:
-        if Pi_index1_pos == 0:
-            near_Pi.append(index1[Pi_index1_pos+1])
-            near_Pi.append(index1[Pi_index1_pos+2])
-        elif Pi_index1_pos == len(index1)-1:
-            near_Pi.append(index1[Pi_index1_pos-1])
-            near_Pi.append(index1[Pi_index1_pos-2])
-        else:
-            near_Pi.append(index1[Pi_index1_pos-1])
-            near_Pi.append(index1[Pi_index1_pos+1])
-            
-        if Pi_index2_pos == 0:
-            near_Pi.append(index2[Pi_index2_pos+1])
-            near_Pi.append(index2[Pi_index2_pos+2])
-        elif Pi_index2_pos == len(index2)-1:
-            near_Pi.append(index2[Pi_index2_pos-1])
-            near_Pi.append(index2[Pi_index2_pos-2])
-        else:
-            near_Pi.append(index2[Pi_index2_pos-1])
-            near_Pi.append(index2[Pi_index2_pos+1])
-            
-        near_Pi = list(dict.fromkeys(near_Pi))
-        near_Pi.sort()
+#  Start of ClosestPair class
+class ClosestPair:
+    def __init__(self, X, Y):
+        super().__init__()
+        self.min_distance = 0
+        self.P = [(X[i], Y[i]) for i in range(len(X))]
         
-        distance_list = []
-        for j in near_Pi:
-            distance = dist(P[i], P[j])
-            distance_list.append(distance)
+        n = len(self.P)
+        Px = sorted(self.P, key=lambda x: x[0])
+        Py = sorted(self.P, key=lambda x: x[1])
+        
+        self.min_distance = self.Calculate(Px, Py, n)
+        
+    def Calculate(self, Px, Py, n):
+        # Simple case
+        if n == 2:
+            return dist(self.P[0], self.P[1])
+        if n == 3:
+            return min(dist(self.P[0], self.P[1]), dist(self.P[0], self.P[2]), dist(self.P[1], self.P[2]))
+        
+        # Divide 
+        mid = n // 2
+        d_left = self.Calculate(Px, Py[:mid], mid)
+        d_right = self.Calculate(Py, Py[mid:], n - mid)
+        
+        min_distance = min(d_left, d_right)
+        
+        S = [] # points list in strip
+        for p in Px:
+            if abs(p[0] - Px[mid][0]) < min_distance:
+                S.append(p)
+                
+        min_distance_in_strip = float('inf')
+        for i in range(min(6, len(S) - 1), len(S)):
+            for j in range(max(0, i - 6), i):
+                current_dis = dist(S[i], S[j])
+                if current_dis < min_distance:
+                    min_distance_in_strip = current_dis
+        
+        return min(min_distance, min_distance_in_strip)
 
-        min_distance_list.append(min(distance_list))
-    
-    #------------------------------------------------------------------#
-    end_time = time.time() - start_time # unit: seconds
-    return min(min_distance_list), round(end_time*1000, 2) # converted to miliseconds
+    def min_distance_in_points(self):
+        return self.min_distance
+# End of ClosestPair class
 
 def GET_FILE(): # No input
     filter_ = "Excel File (*.xlsx *xlsm)"

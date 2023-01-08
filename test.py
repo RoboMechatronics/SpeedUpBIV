@@ -47994,119 +47994,53 @@ Y_list = [365.8,
 13656.4
 ]
 
-def CAL_MIN_PITCH(X, Y):
-    start_time = time.time()
-    #------------------------------------------------------------------#
-    # Check X array and Y array, return -1 if they has only 1 number
-    if len(X) == 1 or len(Y) == 1: 
-        return -1
-    label = []
-    label = [("P" + str(i)) for i in range(len(X))]
-    # print(label)
-    index = [i for i in range(len(X))]
-    # print(index)
-    P = [(X[i], Y[i]) for i in range(len(X))]
-    P = np.array(P)
-    N = P.shape[0]
-    """
-    plt.subplot(1, 3, 1)
-    plt.scatter(X, Y, color = "red")
-    
-    [plt.annotate(txt, (X_list[i], Y_list[i])) for i, txt in enumerate(label)]
-    plt.title("Original")
-    """
-    # Convert X and Y list to array type
-    index1 = np.lexsort((Y, X))
-    # print("index 1 = ", index1)
-    P1 = [(X[i],Y[i]) for i in index1]
-    P1 = np.array(P1)
-    X1 = [X[i] for i in index1]
-    Y1 = [Y[i] for i in index1]
-    """
-    plt.subplot(1, 3, 2)
-    plt.scatter(X1, Y1, color='blue')
-    [plt.annotate(txt, (P1[i])) for i, txt in enumerate(label)]
-    plt.title("Sort Y by X")
-    """
-    # Convert X and Y list to array type
-    index2 = np.lexsort((X, Y))
-    # print("index 2 = ", index2)
-    P2 = [(X[i],Y[i]) for i in index2]
-    P2 = np.array(P2)
-    X2 = [X[i] for i in index2]
-    Y2 = [Y[i] for i in index2]
-    """
-    plt.subplot(1, 3, 3)
-    plt.scatter(X2, Y2, color='green')
-    [plt.annotate(txt, (P2[i])) for i, txt in enumerate(label)]
-    plt.title("Sort X by Y")
-    """
-    # print("P=\n", P)
-    # print("P1=\n", P1)
-    # print("P2=\n", P2)
-    min_distance_list = []
-    for i in range(N):
-        Pi_pos_in_index1 = np.where(index1==i)[0][0]
-        Pi_pos_in_index2 = np.where(index2==i)[0][0]
-        # print(Pi_pos_in_index1)
-        # print(Pi_pos_in_index2)
+class ClosestPair:
+    def __init__(self, X, Y):
+        super().__init__()
+        self.min_distance = 0
+        self.P = [(X[i], Y[i]) for i in range(len(X))]
+        n = len(self.P)
+        Px = sorted(self.P, key=lambda x: x[0])
+        Py = sorted(self.P, key=lambda x: x[1])
+        self.min_distance = self.Calculate(Px, Py, n)
         
-        near_Pi_index1 = []
-        if Pi_pos_in_index1 == 0:
-            near_Pi_index1.append(Pi_pos_in_index1 + 1)
-        if Pi_pos_in_index1 == N - 1:
-            near_Pi_index1.append(Pi_pos_in_index1 - 1)
-        if Pi_pos_in_index1 > 0 and Pi_pos_in_index1 < N - 1:
-            near_Pi_index1.append(Pi_pos_in_index1 - 1)
-            near_Pi_index1.append(Pi_pos_in_index1 + 1)
-            
-        near_Pi_index2 = []
-        if Pi_pos_in_index2 == 0:
-            near_Pi_index2.append(Pi_pos_in_index2 + 1)
-        if Pi_pos_in_index2 == N - 1:
-            near_Pi_index2.append(Pi_pos_in_index2 - 1)
-        if Pi_pos_in_index2 > 0 and Pi_pos_in_index2 < N - 1:
-            near_Pi_index2.append(Pi_pos_in_index2 - 1)
-            near_Pi_index2.append(Pi_pos_in_index2 + 1)
-        
-        near_Pi = []
-        for near in near_Pi_index1:
-            near_Pi.append(index1[near])
-        for near in near_Pi_index2:
-            near_Pi.append(index2[near])
-        
-        near_Pi = list(dict.fromkeys(near_Pi))
-        # print("near P[",i,"] is P",near_Pi)
-        
-        distance_list = []
-        for d in range(len(near_Pi)):
-            if d == i:
-                continue
-            else:
-                distance = dist(P[i], P[near_Pi[d]])
-                distance_list.append(distance)
-        min_dis = min(distance_list)
-        minX = P[i][0] - min_dis
-        maxX = P[i][0] + min_dis
-        minY = P[i][1] - min_dis
-        maxY = P[i][1] + min_dis
-        
-        near_Pi = []
-        P_index = []
-        
-        P_index = [k for k in range(N)]
-        near_Pi = [index if P[index][0] >= minX and P[index][0] <= maxX and P[index][1] >= minY and P[index][1] <= maxY and index != i else -1 for index in P_index[:N//2]]
-        near_Pi = [index if P[index][0] >= minX and P[index][0] <= maxX and P[index][1] >= minY and P[index][1] <= maxY and index != i else -1 for index in P_index[N//2:]]
-        
-        near_Pi = list(dict.fromkeys(near_Pi))
-        print("P[",i,"] near P", near_Pi)
+    def Calculate(self, Px, Py, n):
+        # base case
+        if n == 2:
+            return dist(self.P[0], self.P[1])
+        if n == 3:
+            return min(dist(self.P[0], self.P[1]), dist(self.P[0], self.P[2]), dist(self.P[1], self.P[2]))
 
-    #------------------------------------------------------------------#
+        # recursion
+        mid = n // 2
+        d_left = self.Calculate(Px, Py[:mid], mid)
+        d_right = self.Calculate(Py, Py[mid:], n - mid)
+        
+        min_distance = min(d_left, d_right)
+        S = []
+        for p in Px:
+            if abs(p[0] - Px[mid][0]) < min_distance:
+                S.append(p)
+        
+        min_distance_in_strip = (float('inf'))
+        for i in range(min(6, len(S) - 1), len(S)):
+            for j in range(max(0, i - 6), i):
+                current_dis = dist(S[i], S[j])
+                if current_dis < min_distance:
+                    min_distance_in_strip = current_dis
+        
+        return min(min_distance, min_distance_in_strip)
+
+    def Return(self):
+        return self.min_distance
+
+if __name__ == "__main__":
+ 
+    start_time = time.time()
+    
+    cal_min_distance = ClosestPair(X_list, Y_list)
+    print("Distance method 2:", cal_min_distance.Return())
+    
     end_time = time.time() - start_time
     print("duration: ", round(end_time*1000, 2), "ms")
     
-    plt.show()
-    return 0
-
-CAL_MIN_PITCH(X_list, Y_list)
-
