@@ -216,24 +216,96 @@ def UPDATE_PARAMETER_FOR_EXISTED_PROJECT(card_part_number):
     spec_file_name = card_part_number + "_spec_file.txt"
     return spec_file_name
 
-def EXPORT_XY_INPUT_FORMAT_FOR_IUA_PLUS_FILE(card_part_number):
+def GET_FILE_PATH(path_file, file_need_find):
+    path_file_open = open(path_file, 'r')
+    content = path_file_open.readlines()
+    path_file_open.close()
+
+    file_name, file_extension = "", ""
+
+    for i in content:
+        if file_need_find in i:
+            file_name = i[len(file_need_find+"="):i.index(".")]
+            if "." in i:
+                file_extension = i[i.index("."):]
+                file_extension = file_extension[1:]
+            break
+                
+    # completed to get file name, file extension from path.txt file
+    return file_name, file_extension
+
+def GET_FOLDER_PATH(path_file, folder_name_to_find):
+    # Open paths.txt file
+    path_file_open = open(path_file, 'r')
+    # Read paths.txt file and store file content to content variable
+    content = path_file_open.readlines()
+    # Close file
+    path_file_open.close()
+    # Inital variable
+    folder_path = ""
+    # Find file name string in content file
+    for i in content:
+        if folder_name_to_find in i:
+            folder_path = i[len(folder_name_to_find+"="):]
+            break
+                
+    # completed to get folder path
+    return folder_path
+
+def GET_REVISION_STRING(path_file, string_to_find):
+    # Open paths.txt file
+    path_file_open = open(path_file, 'r')
+    # Read paths.txt file and store file content to content variable
+    content = path_file_open.readlines()
+    # Close file
+    path_file_open.close()
+    # Inital variable
+    revision_string = ""
+    # Find file name string in content file
+    for i in content:
+        if string_to_find in i:
+            revision_string = i[len(string_to_find)+len("="):i.index("\n")]
+            break
+                
+    # completed to get folder path
+    return revision_string
+
+def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(card_part_number, X, Y, unit):
     # input:
-    # card_part_number as PCX-000000, MSP-000000
-    file_name = "YYY-XXXXXX_XY input format for IUA_plus_Rev00.xlsx"
-    template_location = "templates/"
+    # 1.card_part_number as PCX-000000, MSP-000000
+    # 2.X coordinates from tab 1 table, like X = [0,1,2,3,4,5,...,n]
+    # 3.Y coordinates from tab 1 table, like Y = [0,1,2,3,4,5,...,n]
+    # 4.Unit is mm as default, convert to mm if unit is not 'mm'
     
+    # Get file name, file extension from path.txt file
+    file_name, file_extension = GET_FILE_PATH('paths.txt', 'XY_FORMAT_FOR_IUA_PLUS_FILENAME')
+    # example: file_name = "YYY-XXXXXX_XY input format for IUA_plus_Rev00" and file_extension = "xlsx"
+    
+    # Get folder template path
+    template_location = GET_FOLDER_PATH('paths.txt', 'folder_template_path')
+    
+    # Get revision in file name:
+    revision_string_format = GET_REVISION_STRING('paths.txt', "REVISION_FORMAT")
+    
+    revision_pos_in_file_name = file_name.index(revision_string_format)
+    revision_string = file_name[revision_pos_in_file_name:]
+    
+    temp = revision_string[len(revision_string_format):]
+    # Check nummberic or alpha:
+    if temp....
     numeric_revision = "" # from 00 to 99
     letter_revision = "" # from A to Z and AA to ZZ
     sheet_name = "Sheet1"
 
     new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
-    new_location = "result/"
+    new_location = GET_FOLDER_PATH('paths.txt', 'design_folder_path' + "/" + str(card_part_number) + 'xx')
 
     # Create new file
     try:
         shutil.copyfile(template_location+filename, new_location + file_name)
     except:
         return
+    
     # start to update revision
     p = 0
     list_ = []

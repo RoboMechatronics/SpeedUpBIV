@@ -11,6 +11,7 @@ from xlwt import Workbook
 import openpyxl
 import shutil
 import time
+from datetime import datetime
 
 class MainWindow(QMainWindow):
     def __init__(self, app, new_project, spec=None):
@@ -66,6 +67,7 @@ class MainWindow(QMainWindow):
         self.export_ARRAY_FULL_SIZE_FILE_files      = True
         self.export_ROBE_HEAD_XY_FILE_files         = True
         self.export_PCB_PADS_LOCATION_FILE_files    = True
+        self.export_PRELIM
         self.export_IUA_PLUS_FILE_files             = True
         self.export_CRD_PLUS_FILE_files             = True
 
@@ -81,8 +83,7 @@ class MainWindow(QMainWindow):
         table_tab2_layout.addWidget(self.table_tab2)
         self.Tab_content.tab2.setLayout(table_tab2_layout)
 
-        if CARD_PART_NUMBER['VALUE#'] != "":
-            self.tree_tab3 = QTreeWidget()
+        if CARD_PART_NUMBER['VALUE#'] != "": self.tree_tab3 = QTreeWidget()
             
         # Set main windoe title
         self.setWindowTitle(APP_NAME)
@@ -133,11 +134,14 @@ class MainWindow(QMainWindow):
         self.die_pattern_Action     = QAction(QIcon('icon/die_pattern.png'), DIE_PATTERN_BUTTON, self)
 
         # Set functions
-        self.exitAction.triggered.connect(self.CALL_EXIT_APP)
+        self.exitAction.triggered.connect(self.EXIT_APP)
+        
         self.createChartAction.triggered.connect(self.CALL_CREATE_CHART)
+        
         self.clearChartAction.triggered.connect(self.CALL_CLEAR_CHART)
         
         self.setInputDataUnitAction.triggered.connect(self.CALL_SET_INPUT_UNIT)
+        
         self.setDataInfoAction.triggered.connect(self.GET_DATA)
         
         self.importSpecformAction.triggered.connect(self.IMPORT_SPEC_FORM)
@@ -224,14 +228,15 @@ class MainWindow(QMainWindow):
         CARD_PART_NUMBER["LABEL"].setFont(QFont("3ds", 10))
         CARD_PART_NUMBER["VALUE"].setFont(QFont("3ds", 10))
         CARD_PART_NUMBER["VALUE"].setAlignment(Qt.AlignRight)
+        # End of Card part number variables
 
-        # Customer name and device name
+        # Customer name
         CUSTOMER_NAME["LABEL"] = QLabel('Customer')
         CUSTOMER_NAME["VALUE"] = QLabel('')
         CUSTOMER_NAME["LABEL"].setFont(QFont("3ds", 10))
         CUSTOMER_NAME["VALUE"].setFont(QFont("3ds", 10))
         CUSTOMER_NAME["VALUE"].setAlignment(Qt.AlignRight)
-
+        # Device name
         DEVICE_NAME["LABEL"] = QLabel('Device')
         DEVICE_NAME["VALUE"] = QLabel('')
         DEVICE_NAME["LABEL"].setFont(QFont("3ds", 10))
@@ -302,7 +307,8 @@ class MainWindow(QMainWindow):
 
         # Die configuration info
         DIE_CONFIG['LABEL'] = QLabel('Die Config')
-        DIE_CONFIG['VALUE'] = QLabel("X = " + str(DIE_CONFIG["X_OR_COLUMN"])+" col  |  " + "Y = " + str(DIE_CONFIG["Y_OR_ROW"]))
+        DIE_CONFIG['VALUE'] = QLabel("X = " + str(DIE_CONFIG["X_OR_COLUMN"]) + " col  |  " + 
+                                     "Y = " + str(DIE_CONFIG["Y_OR_ROW"]) + "row")
         DIE_CONFIG["LABEL"].setFont(QFont("3ds", 10))
         DIE_CONFIG["VALUE"].setFont(QFont("3ds", 10))
         DIE_CONFIG["VALUE"].setAlignment(Qt.AlignRight)
@@ -311,7 +317,8 @@ class MainWindow(QMainWindow):
 
         # Minimum pad size is showed on your UI
         MIN_PAD_SIZE["LABEL"] = QLabel('Min PAD size')
-        MIN_PAD_SIZE["VALUE"] = QLabel("X = " + str(MIN_PAD_SIZE["X"]) + "  and  " + "Y = " + str(MIN_PAD_SIZE["Y"])+ " ")                      
+        MIN_PAD_SIZE["VALUE"] = QLabel("X = " + str(MIN_PAD_SIZE["X"]) + "  and  " + 
+                                       "Y = " + str(MIN_PAD_SIZE["Y"])+ " ")                      
         MIN_PAD_SIZE["LABEL"].setFont(QFont("3ds", 10))
         MIN_PAD_SIZE["VALUE"].setFont(QFont("3ds", 10))
         MIN_PAD_SIZE["VALUE"].setAlignment(Qt.AlignRight)
@@ -321,6 +328,7 @@ class MainWindow(QMainWindow):
         # NC pad per die
         NC_PAD["LABEL"] = QLabel('No. of NC pad per die')
         NC_PAD["VALUE"] = QLabel(str(NC_PAD["VALUE#"]))
+        
         NC_PAD["LABEL"].setFont(QFont("3ds", 10))
         NC_PAD["VALUE"].setFont(QFont("3ds", 10))
         # End of NC pad per die
@@ -328,6 +336,7 @@ class MainWindow(QMainWindow):
         # Keep out info
         KEEP_OUT_TYPE["LABEL"] = QLabel('Keep out infomation')
         KEEP_OUT_TYPE["VALUE"] = QLabel('')
+        
         KEEP_OUT_TYPE["LABEL"].setFont(QFont("3ds", 10))
         KEEP_OUT_TYPE["VALUE"].setFont(QFont("3ds", 10))
         # End of Keep out info
@@ -335,6 +344,7 @@ class MainWindow(QMainWindow):
         # Wafer pad info
         WAFER_PAD["LABEL"] = QLabel('Wafer pad material')
         WAFER_PAD["VALUE"] = QLabel(WAFER_PAD["MATERIAL"])
+        
         WAFER_PAD["LABEL"].setFont(QFont("3ds", 10))
         WAFER_PAD["VALUE"].setFont(QFont("3ds", 10))
         # End of Wafer pad info
@@ -342,6 +352,7 @@ class MainWindow(QMainWindow):
         # Test temperature
         PROBING_TEMP["LABEL"] = QLabel('Test temperature')
         PROBING_TEMP["VALUE"] = QLabel('')
+        
         PROBING_TEMP["LABEL"].setFont(QFont("3ds", 10))
         PROBING_TEMP["VALUE"].setFont(QFont("3ds", 10))
         # End of Test temperature
@@ -349,6 +360,7 @@ class MainWindow(QMainWindow):
         # Current type and value
         DUTY_CYCLE["LABEL"] = QLabel('Duty cycle')
         DUTY_CYCLE["VALUE"] = QLabel(DUTY_CYCLE["TYPE"][0])
+        
         DUTY_CYCLE["LABEL"].setFont(QFont("3ds", 10))
         DUTY_CYCLE["VALUE"].setFont(QFont("3ds", 10))
         # End of Current type and value
@@ -356,6 +368,7 @@ class MainWindow(QMainWindow):
         # Maximum Current
         MAX_CURRENT["LABEL"] = QLabel('Max. Current')
         MAX_CURRENT["VALUE"] = QLabel("")
+        
         MAX_CURRENT["LABEL"].setFont(QFont("3ds", 10))
         MAX_CURRENT["VALUE"].setFont(QFont("3ds", 10))
         # End of Maximum Current
@@ -363,12 +376,14 @@ class MainWindow(QMainWindow):
         # MAX FREQUENCY
         MAX_FREQUENCY["LABEL"] = QLabel('Max. Frequency')
         MAX_FREQUENCY["VALUE"] = QLabel("")
+        
         MAX_FREQUENCY["LABEL"].setFont(QFont("3ds", 10))
         MAX_FREQUENCY["VALUE"].setFont(QFont("3ds", 10))
         # End og MAX FREQUENCY
 
         PROBE_PART_NUMBER['LABEL'] = QLabel('Probe part number')
         PROBE_PART_NUMBER['VALUE'] = QLabel('')
+        
         PROBE_PART_NUMBER["LABEL"].setFont(QFont("3ds", 10))
         PROBE_PART_NUMBER["VALUE"].setFont(QFont("3ds", 10))
         
@@ -700,7 +715,6 @@ class MainWindow(QMainWindow):
         
         MIN_PITCH["VALUE#"] = round(MIN_PITCH["VALUE#"], 2)
         MIN_PITCH["VALUE"].setText(str(MIN_PITCH["VALUE#"]) + " " + UM_UNIT + "  |  " + str(MIN_PITCH_HAS_NC))
-        return
     # End of CALL_SET_INPUT_UNIT() function #
 
     # class MainWindow(QMainWindow):
@@ -817,8 +831,6 @@ class MainWindow(QMainWindow):
         self.Tab_content.chart_tab1.addWidget(self.CHART)
 
         self.DIE_CONFIG = self.get_info.Get_Config_Array()
-        
-        return
     # End of GET_DATA() function #
 
     # class MainWindow(QMainWindow):
@@ -827,27 +839,40 @@ class MainWindow(QMainWindow):
     
     # class MainWindow(QMainWindow):
     def CALL_GENERATE_XY_LIST_SV_FORMAT(self):
-        self.table_tab2.TableWidget = GENERATE_XY_LIST_SV_FORMAT(self.table_tab2.TableWidget, self.DUT_NAME_LIST, self.PAD_NUMBER_LIST, \
-                                                        self.X, self.Y, self.PAD_NAME_LIST, self.NC_LIST, self.XY_INPUT_UNIT, self.NC_DENOTE)
+        self.table_tab2.TableWidget = GENERATE_XY_LIST_SV_FORMAT(self.table_tab2.TableWidget, 
+                                                                 self.DUT_NAME_LIST, 
+                                                                 self.PAD_NUMBER_LIST,
+                                                                 self.X, 
+                                                                 self.Y, 
+                                                                 self.PAD_NAME_LIST, 
+                                                                 self.NC_LIST, 
+                                                                 self.XY_INPUT_UNIT, 
+                                                                 self.NC_DENOTE)
     # class MainWindow(QMainWindow):
     def CALL_EXPORT_FILES(self):
+        # Reset status
+        self.status.showMessage("Ready!")
+        
         # Concate variables
-        option = [  self.export_all_files, \
-                    self.export_XY_FORMAT_FOR_IUA_PLUS_files, \
-                    self.export_ARRAY_FULL_SIZE_FILE_files, \
-                    self.export_ROBE_HEAD_XY_FILE_files, \
-                    self.export_PCB_PADS_LOCATION_FILE_files, \
-                    self.export_IUA_PLUS_FILE_files, \
+        input_ = [  self.export_all_files,
+                    self.export_XY_FORMAT_FOR_IUA_PLUS_files,
+                    self.export_ARRAY_FULL_SIZE_FILE_files,
+                    self.export_ROBE_HEAD_XY_FILE_files,
+                    self.export_PCB_PADS_LOCATION_FILE_files,
+                    self.export_IUA_PLUS_FILE_files,
                     self.export_CRD_PLUS_FILE_files
                 ]
         # Call EXPORT_FILES function and get return value
         # status: 1 or 0
         # a tub: true or false for every elements
-        status, [self.export_all_files, self.export_XY_FORMAT_FOR_IUA_PLUS_files, \
-                self.export_ARRAY_FULL_SIZE_FILE_files, self.export_ROBE_HEAD_XY_FILE_files, \
-                self.export_PCB_PADS_LOCATION_FILE_files, self.export_IUA_PLUS_FILE_files, \
-                self.export_CRD_PLUS_FILE_files]    = EXPORT_FILES(self.table_tab2.TableWidget, option)
-       
+        status, [self.export_all_files, \
+                self.export_XY_FORMAT_FOR_IUA_PLUS_files, \
+                self.export_ARRAY_FULL_SIZE_FILE_files, \
+                self.export_ROBE_HEAD_XY_FILE_files, \
+                self.export_PCB_PADS_LOCATION_FILE_files, \
+                self.export_IUA_PLUS_FILE_files, \
+                self.export_CRD_PLUS_FILE_files]    = EXPORT_FILES(self.table_tab2.TableWidget, input_)
+ 
         if status == 1: 
             self.EXPORT_SPEC_FILE()
             self.status.showMessage("Export Done!")
@@ -896,12 +921,14 @@ class MainWindow(QMainWindow):
         Stepping_distance = [STEPPING_DISTANCE["X"], STEPPING_DISTANCE["Y"]]
 
         self.X_list_pattern, self.Y_list_pattern = DIE_PATTERN(self.X, self.Y, self.DIE_CONFIG, Stepping_distance)
-
-    def CALL_EXIT_APP(self):
+    # end of CALL_DIE_PATTERN function
+    
+    def EXIT_APP(self):
         self.close()
         return
 
     # class MainWindow(QMainWindow):
+    # this function is enable while the right button mouse was clicked on main window area
     def contextMenuEvent(self, event):
         menu = QMenu(self)
         menu.setStyleSheet('''
@@ -921,7 +948,7 @@ class MainWindow(QMainWindow):
         menu.addAction(self.exportAction)
         menu.addAction(self.final_export_Action)
         menu.exec_(event.globalPos())
-       
+    # End of contextMenuEvent function
 # End of Main Window class #
 
 class Tab_Widget(QWidget): 
@@ -2080,6 +2107,7 @@ class GetInfo(QDialog):
         self.TableColumnCount.setValue(self.columnCount)
         self.Pad_Type_Checkbox.setChecked(False)
         return
+    # end of Reset_button_clicked function
     
     # class GetInfo(QDialog):
     # Set up move window by clicked mouse
@@ -2101,14 +2129,14 @@ class GetInfo(QDialog):
 # End of GetInfo class
 
 # Start GENERATE_XY_LIST_SV_FORMAT function
-def GENERATE_XY_LIST_SV_FORMAT(table_TableWidget, \
-                                DUT_name_list, \
-                                PAD_number_list, \
-                                X_list_input, \
-                                Y_list_input, \
-                                Pad_name_list, \
-                                Remark, \
-                                Input_unit, \
+def GENERATE_XY_LIST_SV_FORMAT(table_TableWidget, 
+                                DUT_name_list, 
+                                PAD_number_list, 
+                                X_list_input, 
+                                Y_list_input, 
+                                Pad_name_list, 
+                                Remark, 
+                                Input_unit, 
                                 nc_denoted):
 
     # Set number of rows and columns similar as excel file
@@ -2232,9 +2260,10 @@ class Notification(QDialog):
 
 # Start EXPORT_FILES function
 def EXPORT_FILES(table_TableWidget , option):
-    export_options = ExportOption(option)
-    option = export_options.Return()
-    
+    # Call ExportOption dialog
+    export_options  = ExportOption(option)
+    option          = export_options.Return()
+  
     if sum(option[1:]) == False:
         return 0, option
     
@@ -2460,7 +2489,7 @@ class ExportOption(QDialog):
                             "border-radius:     10px;")
 
                
-        self.title = QLabel("Files to export")
+        self.title = QLabel("Choose files to export")
         self.title.setStyleSheet(GET_INFO_ON_DIALOG)
 
         self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX    = QCheckBox("XY format for IUA+")
@@ -2489,7 +2518,7 @@ class ExportOption(QDialog):
         self.buttonBox = QDialogButtonBox(QBtn)
 
         self.CHOOSE_ALL_BUTTON = QPushButton("All files")
-        self.CLEAR_ALL_BUTTON   = QPushButton("Clear all")
+        self.CLEAR_ALL_BUTTON  = QPushButton("Clear all")
 
         self.buttonBox.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
         self.CHOOSE_ALL_BUTTON.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
@@ -2517,6 +2546,7 @@ class ExportOption(QDialog):
         self.setLayout(self.vlayout)
         self.show()
         self.exec_()
+        
     # class ExportOption
     def CHOOSE_ALL_FILE(self):
         self.ALL_FILE_CHECK = True
@@ -2526,7 +2556,7 @@ class ExportOption(QDialog):
         self.PCB_PADS_LOCATION_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
         self.IUA_PLUS_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
         self.CRD_PLUS_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
-        return
+    
     # class ExportOption
     def CLEAR_ALL_FILE(self):
         self.ALL_FILE_CHECK = False
@@ -2536,14 +2566,16 @@ class ExportOption(QDialog):
         self.PCB_PADS_LOCATION_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
         self.IUA_PLUS_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
         self.CRD_PLUS_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
-        return
+    
     # class ExportOption
     def Return(self):
-        option = [self.ALL_FILE_CHECK,                                  self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX.isChecked(), \
-                    self.ARRAY_FULL_SIZE_FILE_CHECKBOX.isChecked(),     self.PROBE_HEAD_XY_FILE_CHECKBOX.isChecked(), \
-                    self.PCB_PADS_LOCATION_FILE_CHECKBOX.isChecked(),   self.IUA_PLUS_FILE_CHECKBOX.isChecked(), \
-                    self.CRD_PLUS_FILE_CHECKBOX.isChecked()]
-        return option
+        return self.ALL_FILE_CHECK, \
+               self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX.isChecked(), \
+               self.ARRAY_FULL_SIZE_FILE_CHECKBOX.isChecked(), \
+               self.PROBE_HEAD_XY_FILE_CHECKBOX.isChecked(), \
+               self.PCB_PADS_LOCATION_FILE_CHECKBOX.isChecked(), \
+               self.IUA_PLUS_FILE_CHECKBOX.isChecked(), \
+               self.CRD_PLUS_FILE_CHECKBOX.isChecked() \
     
     # class ExportOption
     # Set up move window by clicked mouse
