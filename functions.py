@@ -270,7 +270,158 @@ def GET_REVISION_STRING(path_file, string_to_find):
     # completed to get folder path
     return revision_string
 
-def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(card_part_number, X, Y, unit):
+def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Release']
+    if old_revision == "":
+        return ""
+    
+    numeric_revision = "" # from 00 to 99, example: 01, 02, 03. Note: 00 is used to initial
+    alpha_revision = "" # from A to Z, AA to ZZ, example: A, B, AA, AB
+    mix_revision = "" # include A and 00 or AA and 00, example: A01, AB01
+
+    # Check nummberic or alpha:
+    if old_revision.isdigit() == True:
+        numeric_revision = old_revision
+        alpha_revision = ""
+        mix_revision = ""
+    elif old_revision.isalpha() == True:
+        alpha_revision = old_revision
+        numeric_revision = ""
+        mix_revision = ""
+    else:
+        mix_revision = old_revision
+        alpha_revision = ""
+        numeric_revision = ""
+        
+    # Convert revision string into s list, like s = ['0','1'] or ['A']
+    s = []
+    if numeric_revision != "":
+        s = [i for i in numeric_revision]
+    elif alpha_revision != "":
+        s = [i for i in alpha_revision]
+    elif mix_revision != "":
+        s = [i for i in mix_revision]
+    
+    if type == "Edit":
+        if s:
+            s.reverse()
+            # Example: change from 01 to 02
+            if numeric_revision != "" and alpha_revision == "" and mix_revision == "":
+                for i, element in enumerate(s):
+                    if ord(element) >= 48 and ord(element) < 57:
+                        s[i] = chr(ord(element) + 1)
+                        break
+                    else:
+                        s[i] = "0"
+                        
+            #Example: change from A to A01
+            if numeric_revision == "" and alpha_revision != "" and mix_revision == "":
+                s.reverse()
+                s.append("01")
+                s.reverse()
+                    
+            # Example: change from A01 to A02, or AA01 to AA02      
+            if numeric_revision == "" and alpha_revision == "" and mix_revision != "":
+                if len(mix_revision) < 3:
+                    return ""
+                
+                if len(mix_revision) == 3:
+                    alpha = mix_revision[0]
+                    number = [i for i in mix_revision[1:]]
+                    number.reverse()
+                    for i, element in enumerate(number):
+                        if ord(element) >= 48 and ord(element) < 57:
+                            number[i] = chr(ord(element) + 1)
+                            break
+                        else:
+                            number[i] = "0"
+                    number_ = ""
+                    for i in number:
+                        number_ = number_ + i
+                    number_ = number_ + alpha
+                    
+                    s = []
+                    s = [i for i in number_]
+                    
+                if len(mix_revision) == 4:
+                    alpha = mix_revision[:2]
+                    number = [i for i in mix_revision[2:]]
+                    number.reverse()
+                    for i, element in enumerate(number):
+                        if ord(element) >= 48 and ord(element) < 57:
+                            number[i] = chr(ord(element) + 1)
+                            break
+                        else:
+                            number[i] = "0"
+                    number_ = ""
+                    
+                    for i in number:
+                        number_ = number_ + i
+                    number_ = number_ + alpha
+                    
+                    s = []
+                    s = [i for i in number_]
+            
+            s.reverse()
+            new_revision = ""
+            for i in s:
+                new_revision = new_revision + i
+        else:
+            return ""
+    
+    if type == "Release":
+        if s:
+            s.reverse()
+            if numeric_revision != "" and alpha_revision == "" and mix_revision == "":
+                s = []
+                s.append("A")
+                
+            if numeric_revision == "" and alpha_revision == "" and mix_revision != "":
+                s.reverse()
+                alpha = ""
+                number = ""
+                if len(s) == 3:
+                    alpha = s[0]
+                    number = [i for i in s[1:]]
+                    
+                if len(s) == 4:
+                    alpha = s[:2]
+                    number = [i for i in s[2:]]
+                
+                # Example: A to B, Z to AA
+                if alpha == "Z":
+                    alpha =  "AA"
+                s = []
+                s.append(alpha)
+                
+                if alpha == "ZZ":
+                    alpha = "AAA"
+                    s = []
+                    s.append(alpha)
+                s.reverse()
+                
+            if numeric_revision == "" and alpha_revision != "" and mix_revision == "":
+                # Example: A to B, Z to AA
+                if alpha_revision == "Z":
+                    return "AA"
+                if alpha_revision == "ZZ":
+                    return "AAA"
+                
+                for i, element in enumerate(s):
+                    if ord(element) >= 65 and ord(element) < 90:
+                        s[i] = chr(ord(element) + 1)
+                        break
+                    else:
+                        s[i] = "A"
+            s.reverse()
+            new_revision = ""
+            for i in s:
+                    new_revision = new_revision + i
+        else:
+            return ""
+    
+    return new_revision # like: 02, A, B, A02
+
+def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(card_part_number, X, Y, unit, sheet_name = 'Sheet1'):
     # input:
     # 1.card_part_number as PCX-000000, MSP-000000
     # 2.X coordinates from tab 1 table, like X = [0,1,2,3,4,5,...,n]
@@ -291,45 +442,69 @@ def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(card_part_number, X, Y, unit):
     revision_string = file_name[revision_pos_in_file_name:]
     
     temp = revision_string[len(revision_string_format):]
+        
+    numeric_revision = "" # from 00 to 99, example: 01, 02, 03. Note: 00 is used to initial
+    letter_revision = "" # from A to Z, AA to ZZ, example: A, B, AA, AB
+    mix_revision = "" # include A and 00 or AA and 00, example: A01, AB01
+    
     # Check nummberic or alpha:
-    if temp....
-    numeric_revision = "" # from 00 to 99
-    letter_revision = "" # from A to Z and AA to ZZ
-    sheet_name = "Sheet1"
-
+    if temp.isdigit() == True:
+        numeric_revision = temp
+        alpha_revision = ""
+        mix_revision = ""
+    elif temp.isalpha() == True:
+        alpha_revision = temp
+        numeric_revision = ""
+        mix_revision = ""
+    else:
+        mix_revision = temp
+        alpha_revision = ""
+        numeric_revision = ""
+        
     new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
     new_location = GET_FOLDER_PATH('paths.txt', 'design_folder_path' + "/" + str(card_part_number) + 'xx')
 
     # Create new file
     try:
-        shutil.copyfile(template_location+filename, new_location + file_name)
+        shutil.copyfile(template_location + "/" + filename, new_location + "/" + file_name)
     except:
         return
     
     # start to update revision
-    p = 0
-    list_ = []
-    list_ = [i for i in numeric_revision]
-    list_.reverse()
-    if numeric_revision.isnumeric():
-        for i, element in enumerate(list_):
-            if ord(element) >= 48 and ord(element) < 57 and p == 0:
-                list_[i] = chr(ord(element)+1)
-                p = 1
-                break
-            else:
-                list_[i] = "0"
-    else:
-        # print("Not numeric")
-        return
+    s = []
+    if numeric_revision != "":
+        s = [i for i in numeric_revision]
+    if alpha_revision != "":
+        s = [i for i in alpha_revision]
+    if mix_revision != "":
+        s = [i for i in mix_revision]
+    
+    if s:
+        s.reverse()
+        
+        if numeric_revision != "" and alpha_revision == "" and mix_revision == "":
+            for i, element in enumerate(s):
+                if ord(element) >= 48 and ord(element) < 57:
+                    s[i] = chr(ord(element) + 1)
+                    break
+                else:
+                    s[i] = "0"
+        if numeric_revision == "" and alpha_revision != "" and mix_revision == "":
+            for i, element in enumerate(s):
+                if ord(element) >= 65 and ord(element) < 90:
+                    s[i] = chr(ord(element) + 1)
+                    break
+                else:
+                    s[i] = "A"
 
-    list_.reverse()
-    numeric_revision = ""
-    numeric_revision = [numeric_revision + i for i in list_]
-    # End to update revision
+        s.reverse()
+        new_revision = ""
+        for i in s:
+            new_revision = new_revision + i
+        # End to update revision
 
-    workbook = openpyxl.load_workbook(location+file_name)
-    sheet = workbook[sheet_name] # active "Sheet1"
+        # workbook = openpyxl.load_workbook(location+file_name)
+        # sheet = workbook[sheet_name] # active "Sheet1"
     return
 
 def EXPORT_PCB_PAD_LOCATION_FILE():
