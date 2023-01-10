@@ -1,0 +1,10 @@
+design_folder_path=result
+folder_template_path=templates
+XY_FORMAT_FOR_IUA_PLUS_FILENAME=YYY-XXXXXX_XY input format for IUA_plus_Rev00.xlsx
+PCB_PAD_LOCATION_FILE_NAME=YYY-XXXXXX_PCB PADS LOCATION_Rev00.xlsx
+PROBE_HEAD_XY_TEMPLATE_FILENAME=YYY-XXXXXX-xx-Probe Head XY Coordinates For Approval Rev00.xlsx
+ARRAY_FULL_SITE_TEMPLATE_FILENAME=YYY-XXXXXX_Array full sites for reference_Rev00.xlsx
+IUA_PLUS_FILENAME=YYY-XXXXXX-xx_Rev00.iua+
+CRD_PLUS_FILENAME=YYY-XXXXXX-xx_Rev00.crd+
+SPEC_FILE_NAME=YYY-XXXXXX-xx_spec_file_Rev00.txt
+REVISION_FORMAT=Rev

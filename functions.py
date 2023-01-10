@@ -5,6 +5,7 @@ import os
 import numpy as np
 import pandas as pd
 import time
+import shutil
 # from scipy.spatial.distance import euclidean
 
 def GET_XY_FROM_MOUSE(Table):
@@ -230,7 +231,8 @@ def GET_FILE_PATH(path_file, file_need_find):
                 file_extension = i[i.index("."):]
                 file_extension = file_extension[1:]
             break
-                
+    file_extension = file_extension.replace("\n", "")
+    file_name = file_name.replace("\n", "")
     # completed to get file name, file extension from path.txt file
     return file_name, file_extension
 
@@ -248,7 +250,7 @@ def GET_FOLDER_PATH(path_file, folder_name_to_find):
         if folder_name_to_find in i:
             folder_path = i[len(folder_name_to_find+"="):]
             break
-                
+    folder_path = folder_path.replace('\n', "")
     # completed to get folder path
     return folder_path
 
@@ -270,30 +272,42 @@ def GET_REVISION_STRING(path_file, string_to_find):
     # completed to get folder path
     return revision_string
 
-def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Release']
+# Start of REVISION_CHANGE_TYPE function:
+# Input:
+# - old_revision: old revision
+# - type: Edit, Release or Override
+def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): 
+    # Check old_revision string if it is empty 
     if old_revision == "":
-        return ""
+        return "" 
     
+    # Keep revision if type is Override
+    if type == "Override":
+        return old_revision
+
+    # If old_revision string is not empty:
+    # Initial variables
     numeric_revision = "" # from 00 to 99, example: 01, 02, 03. Note: 00 is used to initial
     alpha_revision = "" # from A to Z, AA to ZZ, example: A, B, AA, AB
     mix_revision = "" # include A and 00 or AA and 00, example: A01, AB01
 
-    # Check nummberic or alpha:
-    if old_revision.isdigit() == True:
+    # Check numberic or alpha or mix type:
+    if old_revision.isdigit() == True: # revision value is like "01", "02", or "03"
         numeric_revision = old_revision
         alpha_revision = ""
         mix_revision = ""
-    elif old_revision.isalpha() == True:
+
+    elif old_revision.isalpha() == True: # revision value is like "A" or "AA"
         alpha_revision = old_revision
         numeric_revision = ""
         mix_revision = ""
-    else:
+
+    else: # Revision value is like "A01" or "AA01"
         mix_revision = old_revision
         alpha_revision = ""
         numeric_revision = ""
-        
-    # Convert revision string into s list, like s = ['0','1'] or ['A']
-    s = []
+
+    s = [] # Convert revision string into list, like s = ['0','1'] or ['A']
     if numeric_revision != "":
         s = [i for i in numeric_revision]
     elif alpha_revision != "":
@@ -302,9 +316,10 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Releas
         s = [i for i in mix_revision]
     
     if type == "Edit":
-        if s:
+        if s: # if list is not empty
             s.reverse()
-            # Example: change from 01 to 02
+
+            # Case 1: digit, change from 01 to 02, keyword: digit2digit
             if numeric_revision != "" and alpha_revision == "" and mix_revision == "":
                 for i, element in enumerate(s):
                     if ord(element) >= 48 and ord(element) < 57:
@@ -313,13 +328,13 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Releas
                     else:
                         s[i] = "0"
                         
-            #Example: change from A to A01
+            # Case 2: alpha, change from A to A01, keyword: alpha2alphadigit
             if numeric_revision == "" and alpha_revision != "" and mix_revision == "":
                 s.reverse()
                 s.append("01")
                 s.reverse()
                     
-            # Example: change from A01 to A02, or AA01 to AA02      
+            # Case 3: alpha + digit,  change from A01 to A02, or AA01 to AA02, keyword: alphadigit2alphadigit
             if numeric_revision == "" and alpha_revision == "" and mix_revision != "":
                 if len(mix_revision) < 3:
                     return ""
@@ -329,7 +344,7 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Releas
                     number = [i for i in mix_revision[1:]]
                     number.reverse()
                     for i, element in enumerate(number):
-                        if ord(element) >= 48 and ord(element) < 57:
+                        if ord(element) >= 48 and ord(element) < 57: # in ACSII, CHAR "A" = 48 in DEC, "Z" = 57
                             number[i] = chr(ord(element) + 1)
                             break
                         else:
@@ -343,7 +358,7 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Releas
                     s = [i for i in number_]
                     
                 if len(mix_revision) == 4:
-                    alpha = mix_revision[:2]
+                    alpha = [i for i in mix_revision[:2]]
                     number = [i for i in mix_revision[2:]]
                     number.reverse()
                     for i, element in enumerate(number):
@@ -352,14 +367,18 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Releas
                             break
                         else:
                             number[i] = "0"
-                    number_ = ""
                     
+                    number_ = ""
+                    alpha.reverse()
+                    number.reverse()
                     for i in number:
                         number_ = number_ + i
-                    number_ = number_ + alpha
+                    for i in alpha:
+                        number_ = i + number_
                     
                     s = []
                     s = [i for i in number_]
+                    s.reverse()
             
             s.reverse()
             new_revision = ""
@@ -371,34 +390,44 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Releas
     if type == "Release":
         if s:
             s.reverse()
+            # Case 1: digit, example: 01 to A, keyword: digit2alpha
             if numeric_revision != "" and alpha_revision == "" and mix_revision == "":
                 s = []
                 s.append("A")
-                
+
+            # Case 2: mix, example: A01 to B, keyword: alphadigit2alpha
             if numeric_revision == "" and alpha_revision == "" and mix_revision != "":
-                s.reverse()
-                alpha = ""
-                number = ""
-                if len(s) == 3:
-                    alpha = s[0]
-                    number = [i for i in s[1:]]
-                    
-                if len(s) == 4:
-                    alpha = s[:2]
-                    number = [i for i in s[2:]]
+                alpha   = []
+                number  = []
+
+                if len(mix_revision) == 3:
+                    alpha.append(mix_revision[0])
+                    number  = [i for i in mix_revision[1:]]
+
+                if len(mix_revision) == 4:
+                    alpha   = [i for i in mix_revision[:2]]
+                    number  = [i for i in mix_revision[2:]]
                 
-                # Example: A to B, Z to AA
-                if alpha == "Z":
-                    alpha =  "AA"
+                # Example: A01 to A
+                if len(alpha) == 1:
+                    if ord(alpha[0]) >= 65 and ord(alpha[0]) < 90:
+                        alpha[0] = chr(ord(alpha[0]) + 1)
+                    else:
+                        alpha[0] = "AA"
+                if len(alpha) == 2:
+                    alpha.reverse()
+                    for i, e in enumerate(alpha):
+                        if ord(e) >= 65 and ord(e) < 90:
+                            alpha[i] = chr(ord(alpha[0]) + 1)
+                            break
+                        else:
+                            alpha[0] = "A"
+                    alpha.reverse()
                 s = []
-                s.append(alpha)
-                
-                if alpha == "ZZ":
-                    alpha = "AAA"
-                    s = []
-                    s.append(alpha)
+                for i in alpha:
+                    s.append(i)
                 s.reverse()
-                
+            # Case 3: alpha, example: A to B, keyword: 
             if numeric_revision == "" and alpha_revision != "" and mix_revision == "":
                 # Example: A to B, Z to AA
                 if alpha_revision == "Z":
@@ -415,109 +444,99 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): # type = ['Edit', 'Releas
             s.reverse()
             new_revision = ""
             for i in s:
-                    new_revision = new_revision + i
+                new_revision = new_revision + i
         else:
             return ""
     
     return new_revision # like: 02, A, B, A02
 
-def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(card_part_number, X, Y, unit, sheet_name = 'Sheet1'):
-    # input:
-    # 1.card_part_number as PCX-000000, MSP-000000
-    # 2.X coordinates from tab 1 table, like X = [0,1,2,3,4,5,...,n]
-    # 3.Y coordinates from tab 1 table, like Y = [0,1,2,3,4,5,...,n]
-    # 4.Unit is mm as default, convert to mm if unit is not 'mm'
+def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(card_part_number="", X=[], Y=[], status="", unit="mm", sheet_name = 'Sheet1'):
+    """
+    # Input Parameters:
+    #   1.card_part_number as PCX-000000, MSP-000000
+    #   2.X coordinates from tab 1 table, like X = [0,1,2,3,4,5,...,n]
+    #   3.Y coordinates from tab 1 table, like Y = [0,1,2,3,4,5,...,n]
+    #   4.sheet_name is "Sheet1" as default
+    #   5.status: Release, Edit or Override
+    # Note Unit is mm as default, convert to mm if unit is not 'mm'
     
     # Get file name, file extension from path.txt file
     file_name, file_extension = GET_FILE_PATH('paths.txt', 'XY_FORMAT_FOR_IUA_PLUS_FILENAME')
     # example: file_name = "YYY-XXXXXX_XY input format for IUA_plus_Rev00" and file_extension = "xlsx"
     
     # Get folder template path
-    template_location = GET_FOLDER_PATH('paths.txt', 'folder_template_path')
+    folder_template_location    = GET_FOLDER_PATH('paths.txt', 'folder_template_path')
     
     # Get revision in file name:
-    revision_string_format = GET_REVISION_STRING('paths.txt', "REVISION_FORMAT")
+    revision_string_format      = GET_REVISION_STRING('paths.txt', "REVISION_FORMAT")
     
-    revision_pos_in_file_name = file_name.index(revision_string_format)
-    revision_string = file_name[revision_pos_in_file_name:]
+    revision_pos_in_file_name   = file_name.index(revision_string_format)
+    revision_string             = file_name[revision_pos_in_file_name:]
     
-    temp = revision_string[len(revision_string_format):]
-        
-    numeric_revision = "" # from 00 to 99, example: 01, 02, 03. Note: 00 is used to initial
-    letter_revision = "" # from A to Z, AA to ZZ, example: A, B, AA, AB
-    mix_revision = "" # include A and 00 or AA and 00, example: A01, AB01
+    old_revision = revision_string[len(revision_string_format):]
+    new_revision = REVISION_CHANGE_TYPE(old_revision, status) # status  = ["Release", "Edit", "Override"]
     
-    # Check nummberic or alpha:
-    if temp.isdigit() == True:
-        numeric_revision = temp
-        alpha_revision = ""
-        mix_revision = ""
-    elif temp.isalpha() == True:
-        alpha_revision = temp
-        numeric_revision = ""
-        mix_revision = ""
-    else:
-        mix_revision = temp
-        alpha_revision = ""
-        numeric_revision = ""
-        
     new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
-    new_location = GET_FOLDER_PATH('paths.txt', 'design_folder_path' + "/" + str(card_part_number) + 'xx')
-
-    # Create new file
+    new_file_name = file_name.replace(old_revision, new_revision)
+    new_location = GET_FOLDER_PATH('paths.txt', 'design_folder_path') + "/" + str(card_part_number) + '-xx'
+    
+    scr = folder_template_location + "/" + file_name + "." + file_extension
+    dst = new_location + "/" + new_file_name + "." + file_extension
+    
     try:
-        shutil.copyfile(template_location + "/" + filename, new_location + "/" + file_name)
+        shutil.copyfile(scr, dst)
     except:
-        return
+        # Create new file
+        if not os.path.exists(dst):
+            return "A folder does not exist"
+        else:
+            return "Error!"
     
-    # start to update revision
-    s = []
-    if numeric_revision != "":
-        s = [i for i in numeric_revision]
-    if alpha_revision != "":
-        s = [i for i in alpha_revision]
-    if mix_revision != "":
-        s = [i for i in mix_revision]
-    
-    if s:
-        s.reverse()
-        
-        if numeric_revision != "" and alpha_revision == "" and mix_revision == "":
-            for i, element in enumerate(s):
-                if ord(element) >= 48 and ord(element) < 57:
-                    s[i] = chr(ord(element) + 1)
-                    break
-                else:
-                    s[i] = "0"
-        if numeric_revision == "" and alpha_revision != "" and mix_revision == "":
-            for i, element in enumerate(s):
-                if ord(element) >= 65 and ord(element) < 90:
-                    s[i] = chr(ord(element) + 1)
-                    break
-                else:
-                    s[i] = "A"
-
-        s.reverse()
-        new_revision = ""
-        for i in s:
-            new_revision = new_revision + i
-        # End to update revision
-
-        # workbook = openpyxl.load_workbook(location+file_name)
-        # sheet = workbook[sheet_name] # active "Sheet1"
-    return
+    load_workbook = openpyxl.load_workbook(dst)
+    active_sheet = workbook[sheet_name] # active "Sheet1"
+    """
+    return "EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE"
 
 def EXPORT_PCB_PAD_LOCATION_FILE():
-    return
+    return "EXPORT_PCB_PAD_LOCATION_FILE"
 
 def EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE():
-    return
+    return "EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE"
 
 def EXPORT_IUA_PLUS_FILE():
-    return
+    return "EXPORT_IUA_PLUS_FILE"
 
 def EXPORT_CRD_PLUS_FILE():
-    return
+    return "EXPORT_CRD_PLUS_FILE"
 
 def EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE():
-    return
+    """
+    # Create a copy version from template for specify device
+    try:
+        shutil.copyfile(PROBE_HEAD_XY_TEMPLATE_FULLPATH, PROBE_HEAD_XY_FULLPATH)
+    except PermissionError:
+        Notification('Error', "This command can not perform. Please check again!")
+        return 0, option
+    
+    # Load workbook
+    workbook = openpyxl.load_workbook(PROBE_HEAD_XY_FULLPATH)
+
+    # Active sheet 
+    sheet = workbook[PROBE_HEAD_XY_SHEETS_NAME[1]]
+    for row in range(1, table_TableWidget.rowCount()):
+        for col in range(1,table_TableWidget.columnCount()+1):
+            if table_TableWidget.item(row, col-1) is None:
+                sheet.cell(row+7, col).value = ""
+            else:
+                text = table_TableWidget.item(row, col-1).text()
+                if text.isdigit()==1:
+                    sheet.cell(row+7, col).value = int(text)
+                elif text.replace(".","").replace("-", "").isnumeric():
+                    sheet.cell(row+7, col).value = float(text)
+                else:
+                    sheet.cell(row+7, col).value = text
+
+    # Save workbook
+    workbook.save(PROBE_HEAD_XY_FULLPATH)
+    """
+    return "PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE"

@@ -62,14 +62,14 @@ class MainWindow(QMainWindow):
         self.Remember_UNIT          = False
 
         # Export files option
-        self.export_all_files                       = True
-        self.export_XY_FORMAT_FOR_IUA_PLUS_files    = True
-        self.export_ARRAY_FULL_SIZE_FILE_files      = True
-        self.export_ROBE_HEAD_XY_FILE_files         = True
-        self.export_PCB_PADS_LOCATION_FILE_files    = True
-        self.export_PRELIM
-        self.export_IUA_PLUS_FILE_files             = True
-        self.export_CRD_PLUS_FILE_files             = True
+        self.export_all_files                      = True
+        self.export_XY_FORMAT_FOR_IUA_PLUS_file    = True
+        self.export_ARRAY_FULL_SIZE_FILE_file      = True
+        self.export_ROBE_HEAD_XY_FILE_file         = True
+        self.export_PCB_PADS_LOCATION_FILE_file    = True
+        self.export_PRELIM_PTP_FOR_SOLDER_PATTERN  = True
+        self.export_IUA_PLUS_FILE_file             = True
+        self.export_CRD_PLUS_FILE_file             = True
 
         # Create Table widget for Tab 1
         self.table                  = TableWindow()
@@ -855,23 +855,23 @@ class MainWindow(QMainWindow):
         
         # Concate variables
         input_ = [  self.export_all_files,
-                    self.export_XY_FORMAT_FOR_IUA_PLUS_files,
-                    self.export_ARRAY_FULL_SIZE_FILE_files,
-                    self.export_ROBE_HEAD_XY_FILE_files,
-                    self.export_PCB_PADS_LOCATION_FILE_files,
-                    self.export_IUA_PLUS_FILE_files,
-                    self.export_CRD_PLUS_FILE_files
+                    self.export_XY_FORMAT_FOR_IUA_PLUS_file,
+                    self.export_ARRAY_FULL_SIZE_FILE_file,
+                    self.export_ROBE_HEAD_XY_FILE_file,
+                    self.export_PCB_PADS_LOCATION_FILE_file,
+                    self.export_IUA_PLUS_FILE_file,
+                    self.export_CRD_PLUS_FILE_file
                 ]
         # Call EXPORT_FILES function and get return value
         # status: 1 or 0
         # a tub: true or false for every elements
         status, [self.export_all_files, \
-                self.export_XY_FORMAT_FOR_IUA_PLUS_files, \
-                self.export_ARRAY_FULL_SIZE_FILE_files, \
-                self.export_ROBE_HEAD_XY_FILE_files, \
-                self.export_PCB_PADS_LOCATION_FILE_files, \
-                self.export_IUA_PLUS_FILE_files, \
-                self.export_CRD_PLUS_FILE_files]    = EXPORT_FILES(self.table_tab2.TableWidget, input_)
+                self.export_XY_FORMAT_FOR_IUA_PLUS_file, \
+                self.export_ARRAY_FULL_SIZE_FILE_file, \
+                self.export_ROBE_HEAD_XY_FILE_file, \
+                self.export_PCB_PADS_LOCATION_FILE_file, \
+                self.export_IUA_PLUS_FILE_file, \
+                self.export_CRD_PLUS_FILE_file]    = EXPORT_FILES(self.table_tab2.TableWidget, input_)
  
         if status == 1: 
             self.EXPORT_SPEC_FILE()
@@ -2260,40 +2260,49 @@ class Notification(QDialog):
 
 # Start EXPORT_FILES function
 def EXPORT_FILES(table_TableWidget , option):
-    # Call ExportOption dialog
+    # export_options include: 
+        # [0] = ALL_FILE_CHECK
+        # [1] = XY_FORMAT_FOR_IUA_PLUS_CHECKBOX
+        # [2] = ARRAY_FULL_SIZE_FILE_CHECKBOX
+        # [3] = PROBE_HEAD_XY_FILE_CHECKBOX
+        # [4] = PCB_PADS_LOCATION_FILE_CHECKBOX
+        # [5] = IUA_PLUS_FILE_CHECKBOX
+        # [6] = CRD_PLUS_FILE_CHECKBOX
+    
+    # Call ExportOption dialog and get choices
     export_options  = ExportOption(option)
     option          = export_options.Return()
-  
-    if sum(option[1:]) == False:
-        return 0, option
-    
-    # Create a copy version from template for specify device
-    try:
-        shutil.copyfile(PROBE_HEAD_XY_TEMPLATE_FULLPATH, PROBE_HEAD_XY_FULLPATH)
-    except PermissionError:
-        Notification('Error', "This command can not perform. Please check again!")
-        return 0, option
-    
-    # Load workbook
-    workbook = openpyxl.load_workbook(PROBE_HEAD_XY_FULLPATH)
+    print(option)
 
-    # Active sheet 
-    sheet = workbook[PROBE_HEAD_XY_SHEETS_NAME[1]]
-    for row in range(1, table_TableWidget.rowCount()):
-        for col in range(1,table_TableWidget.columnCount()+1):
-            if table_TableWidget.item(row, col-1) is None:
-                sheet.cell(row+7, col).value = ""
-            else:
-                text = table_TableWidget.item(row, col-1).text()
-                if text.isdigit()==1:
-                    sheet.cell(row+7, col).value = int(text)
-                elif text.replace(".","").replace("-", "").isnumeric():
-                    sheet.cell(row+7, col).value = float(text)
-                else:
-                    sheet.cell(row+7, col).value = text
+    if option.count(False) == len(option):
+        print("No any export!")
+        return 0, option
 
-    # Save workbook
-    workbook.save(PROBE_HEAD_XY_FULLPATH)
+    if option[0] == True:
+        print(EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE())
+        print(EXPORT_PCB_PAD_LOCATION_FILE())
+        print(EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE())
+        print(EXPORT_IUA_PLUS_FILE())
+        print(EXPORT_CRD_PLUS_FILE())
+        print(EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE())
+    else:
+        if option[1] == True:
+            print(EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE())
+        
+        if option[2] == True:
+            print(EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE())
+        
+        if option[3] == True:
+            print(EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE())
+        
+        if option[4] == True:
+            print(EXPORT_PCB_PAD_LOCATION_FILE())
+        
+        if option[5] == True:
+            print(EXPORT_IUA_PLUS_FILE())
+        
+        if option[6] == True:
+            print(EXPORT_CRD_PLUS_FILE())
 
     return 1, option
 # End of EXPORT_FILES function
@@ -2472,10 +2481,10 @@ class SplashScreen(QDialog):
 class ExportOption(QDialog):
     def __init__(self, option):
         # option parameters, option variable is a list 
-        # 0.export_all_files                      1.export_XY_FORMAT_FOR_IUA_PLUS_files
-        # 2.export_ARRAY_FULL_SIZE_FILE_files     3.export_ROBE_HEAD_XY_FILE_files
-        # 4.export_PCB_PADS_LOCATION_FILE_files   5.export_IUA_PLUS_FILE_files
-        # 6.export_CRD_PLUS_FILE_files
+        # 0.export_all_files                      1.export_XY_FORMAT_FOR_IUA_PLUS_file
+        # 2.export_ARRAY_FULL_SIZE_FILE_file     3.export_PROBE_HEAD_XY_FILE_file
+        # 4.export_PCB_PADS_LOCATION_FILE_file   5.export_IUA_PLUS_FILE_file
+        # 6.export_CRD_PLUS_FILE_file
         
         super().__init__()
         # Dialog Setup
@@ -2488,7 +2497,6 @@ class ExportOption(QDialog):
                             "border:            1px solid white;"
                             "border-radius:     10px;")
 
-               
         self.title = QLabel("Choose files to export")
         self.title.setStyleSheet(GET_INFO_ON_DIALOG)
 
@@ -2569,6 +2577,14 @@ class ExportOption(QDialog):
     
     # class ExportOption
     def Return(self):
+        # return PARAMETERS: 
+        # [0] = ALL_FILE_CHECK
+        # [1] = XY_FORMAT_FOR_IUA_PLUS_CHECKBOX
+        # [2] = ARRAY_FULL_SIZE_FILE_CHECKBOX
+        # [3] = PROBE_HEAD_XY_FILE_CHECKBOX
+        # [4] = PCB_PADS_LOCATION_FILE_CHECKBOX
+        # [5] = IUA_PLUS_FILE_CHECKBOX
+        # [6] = CRD_PLUS_FILE_CHECKBOX
         return self.ALL_FILE_CHECK, \
                self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX.isChecked(), \
                self.ARRAY_FULL_SIZE_FILE_CHECKBOX.isChecked(), \
@@ -2578,17 +2594,18 @@ class ExportOption(QDialog):
                self.CRD_PLUS_FILE_CHECKBOX.isChecked() \
     
     # class ExportOption
-    # Set up move window by clicked mouse
     def mouseMoveEvent(self, event):
+        # Set up move window by clicked mouse
         try:
             delta = QPoint(event.globalPos() - self.oldPosition)
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPosition = event.globalPos()
         except:
             return
+
     # class ExportOption
-    # Set up move window by clicked mouse
     def mousePressEvent(self, event):
+        # Set up move window by clicked mouse
         try:
             self.oldPosition = event.globalPos()
         except:

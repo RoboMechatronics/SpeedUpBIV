@@ -1,3 +1,5 @@
 from functions import *
+X = [0,1,2,3,4]
+Y = [1,2,3,4,4]
 
-print(REVISION_CHANGE_TYPE("ZA01","Release"))
+print(EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE("PCX-000001", X, Y, "Edit"))
