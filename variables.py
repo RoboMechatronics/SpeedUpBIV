@@ -169,6 +169,11 @@ PROBE_PART_NUMBER = {
     "VALUE": "",
     "PART_NUMBER": "",
 }
+
+REVISION_STATUS = ["Edit", "Release", "Override"]
+EDIT_REVISION = ["01 to 02", "A01 to A02", "A to A01"]
+RELEASE_REVISION = ['01 to A', "A01 to B", "A to B"]
+
 # Styles
 MainStyleSheet = """
     QMainWindow {
@@ -640,6 +645,32 @@ Notification_stylesheet = """
                                     border-radius:     10px;
                                     }
                         """
+
+EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET = """
+    QRadioButton {
+        color: rgb(255,255,255); 
+        background-color: rgba(0, 0, 0, 0); 
+        font: 12px 3ds;
+        border: 0px;
+        }
+    """
+APPLY_ALL_CHECK_BOX_STYLE_SHEET = """
+                                QCheckBox
+                                {
+                                    color: white;
+                                    font: 12px 3ds;
+                                    background-color: rgba(0,0,0,0);                        
+                                    border-radius: 10px;
+                                    border: 0px;
+                                }
+                                QCheckBox:checked
+                                {
+                                    font: 12px 3ds;
+                                    background-color: rgba(0,0,0, 0);
+                                    border-radius:10px;
+                                    border: 0px;
+                                }
+                            """  
 # End of Styles
 
 # Paths
@@ -662,8 +693,11 @@ NC_OPTION = ['No Probe, No Drill Hole', "No Probe, Drill Hole"]
 #--------------------------------------------------------#
 
 # Read paths.txt file to get path
-with open('paths.txt', encoding='utf8') as f:
-    paths = f.readlines()
+try:
+    with open('paths.txt', encoding='utf8') as f:
+        paths = f.readlines()
+except:
+    pass
 # End read paths.txt file to get path
 
 # END #

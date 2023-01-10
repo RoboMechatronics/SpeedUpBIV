@@ -835,10 +835,14 @@ class MainWindow(QMainWindow):
 
     # class MainWindow(QMainWindow):
     def IMPORT_SPEC_FORM(self):
+        self.status.showMessage("Ready!")
         return
     
     # class MainWindow(QMainWindow):
     def CALL_GENERATE_XY_LIST_SV_FORMAT(self):
+        self.status.showMessage("Ready!")
+        self.status.setStyleSheet("color: rgb(255,255,255)")
+        
         self.table_tab2.TableWidget = GENERATE_XY_LIST_SV_FORMAT(self.table_tab2.TableWidget, 
                                                                  self.DUT_NAME_LIST, 
                                                                  self.PAD_NUMBER_LIST,
@@ -848,20 +852,23 @@ class MainWindow(QMainWindow):
                                                                  self.NC_LIST, 
                                                                  self.XY_INPUT_UNIT, 
                                                                  self.NC_DENOTE)
+        return
+    
     # class MainWindow(QMainWindow):
     def CALL_EXPORT_FILES(self):
         # Reset status
         self.status.showMessage("Ready!")
+        self.status.setStyleSheet("color: rgb(255,255,255)")
         
         # Concate variables
-        input_ = [  self.export_all_files,
-                    self.export_XY_FORMAT_FOR_IUA_PLUS_file,
-                    self.export_ARRAY_FULL_SIZE_FILE_file,
-                    self.export_ROBE_HEAD_XY_FILE_file,
-                    self.export_PCB_PADS_LOCATION_FILE_file,
-                    self.export_IUA_PLUS_FILE_file,
-                    self.export_CRD_PLUS_FILE_file
-                ]
+        input_parameters = [self.export_all_files,
+                            self.export_XY_FORMAT_FOR_IUA_PLUS_file,
+                            self.export_ARRAY_FULL_SIZE_FILE_file,
+                            self.export_ROBE_HEAD_XY_FILE_file,
+                            self.export_PCB_PADS_LOCATION_FILE_file,
+                            self.export_IUA_PLUS_FILE_file,
+                            self.export_CRD_PLUS_FILE_file
+                            ]
         # Call EXPORT_FILES function and get return value
         # status: 1 or 0
         # a tub: true or false for every elements
@@ -871,48 +878,60 @@ class MainWindow(QMainWindow):
                 self.export_ROBE_HEAD_XY_FILE_file, \
                 self.export_PCB_PADS_LOCATION_FILE_file, \
                 self.export_IUA_PLUS_FILE_file, \
-                self.export_CRD_PLUS_FILE_file]    = EXPORT_FILES(self.table_tab2.TableWidget, input_)
+                self.export_CRD_PLUS_FILE_file] = EXPORT_FILES(self.table_tab2.TableWidget, input_parameters)
  
-        if status == 1: 
+        if status == "Run": 
             self.EXPORT_SPEC_FILE()
-            self.status.showMessage("Export Done!")
-            self.status.setStyleSheet("color: rgb(255,255,255)")
+            self.status.showMessage("Export Done!")     
+        else:
+            self.status.showMessage(status)
+        # end if
+        return
+    # End of CALL_EXPORT_FILES function
 
     # class MainWindow(QMainWindow):
     def EXPORT_SPEC_FILE(self):
-        path = "result/" + CARD_PART_NUMBER['VALUE#'] + "_spec_file.txt"
-        with open(path, "w") as f:
-            now = datetime.now()
-            current_time = now.strftime("%b-%d-%Y %H:%M:%S")
-
-            f.write('OWNER='                    + os.getlogin() + "\n")
-            f.write('TIME='                     + current_time + "\n")
-            f.write("CARD_PART_NUMBER="         + CARD_PART_NUMBER['VALUE#'] + "\n")
-            f.write("CUSTOMER_NAME="            + CUSTOMER_NAME['VALUE'].text() + "\n")
-            f.write("XY_INPUT_UNIT="            + self.XY_INPUT_UNIT + "\n")
-            f.write("STEPPING_DISTANCE_UNIT="   + self.STEPPING_DISTANCE_UNIT + "\n")
-            f.write("PAD_SIZE_UNIT="            + self.PAD_SIZE_UNIT + "\n")
-            f.write("DUT_NAME_FORMAT="          + self.DUT_NAME_FORMAT + "\n")
-            f.write("DUT_NAME_DELIMITER="       + self.DUT_NAME_DELIMITER + "\n")
-            f.write("DUT_NAME_POSITION="        + str(self.DUT_NAME_POSITION) + "\n")
-            f.write("PAD_NAME_POSITION="        + str(self.PAD_NAME_POSITION) + "\n")
-            f.write("PAD_NUMBER_POSITION="      + str(self.PAD_NUMBER_POSITION) + "\n")
-            f.write("XY_Start_Row_Index="       + str(self.XY_Start_Row_Index) + "\n")
-            f.write("XY_End_Row_Index="         + str(self.XY_End_Row_Index)   + "\n")
-            f.write("Is_PAD_BUMP="              + str(self.Is_PAD_BUMP)       + "\n")
-            f.write("NC_POSITION="              + str(self.NC_POSITION)   + "\n")           
-            f.write("NC_DEMOTE="                + self.NC_DENOTE          + "\n")      
-            f.write("KEEP_OUT_TYPE="            + self.KEEP_OUT_TYPE      + "\n")  
-            f.write("KEEP_OUT_UNIT="            + self.KEEP_OUT_UNIT      + "\n")  
-            f.write("DUTY_CYCLE_TYPE="          + self.DUTY_CYCLE_TYPE    + "\n")
+        # Reset Status
+        self.status.showMessage("Ready!")
+        if CARD_PART_NUMBER['VALUE#'] != "":
+            path = "result/" + CARD_PART_NUMBER['VALUE#'] + "_spec_file.txt"
+            with open(path, "w") as f:
+                # Add time to SPEC FILE
+                now = datetime.now()
+                current_time = now.strftime("%b-%d-%Y %H:%M:%S")
+                # SPEC file content:
+                f.write('OWNER='                    + os.getlogin() + "\n")
+                f.write('TIME='                     + current_time + "\n")
+                f.write("CARD_PART_NUMBER="         + CARD_PART_NUMBER['VALUE#'] + "\n")
+                f.write("CUSTOMER_NAME="            + CUSTOMER_NAME['VALUE'].text() + "\n")
+                f.write("XY_INPUT_UNIT="            + self.XY_INPUT_UNIT + "\n")
+                f.write("STEPPING_DISTANCE_UNIT="   + self.STEPPING_DISTANCE_UNIT + "\n")
+                f.write("PAD_SIZE_UNIT="            + self.PAD_SIZE_UNIT + "\n")
+                f.write("DUT_NAME_FORMAT="          + self.DUT_NAME_FORMAT + "\n")
+                f.write("DUT_NAME_DELIMITER="       + self.DUT_NAME_DELIMITER + "\n")
+                f.write("DUT_NAME_POSITION="        + str(self.DUT_NAME_POSITION) + "\n")
+                f.write("PAD_NAME_POSITION="        + str(self.PAD_NAME_POSITION) + "\n")
+                f.write("PAD_NUMBER_POSITION="      + str(self.PAD_NUMBER_POSITION) + "\n")
+                f.write("XY_Start_Row_Index="       + str(self.XY_Start_Row_Index) + "\n")
+                f.write("XY_End_Row_Index="         + str(self.XY_End_Row_Index)   + "\n")
+                f.write("Is_PAD_BUMP="              + str(self.Is_PAD_BUMP)       + "\n")
+                f.write("NC_POSITION="              + str(self.NC_POSITION)   + "\n")           
+                f.write("NC_DEMOTE="                + self.NC_DENOTE          + "\n")      
+                f.write("KEEP_OUT_TYPE="            + self.KEEP_OUT_TYPE      + "\n")  
+                f.write("KEEP_OUT_UNIT="            + self.KEEP_OUT_UNIT      + "\n")  
+                f.write("DUTY_CYCLE_TYPE="          + self.DUTY_CYCLE_TYPE    + "\n")
+        else:
+            self.status.showMessage("No Card Number!")
+            return
 
     # class MainWindow(QMainWindow):
     def FINAL_EXPORT(self):
+        self.status.showMessage("Ready!")
         # Check before final exporting #
         # ...code here...#
 
-        self.CALL_EXPORT_FILES()
-        self.EXPORT_SPEC_FILE()
+        # self.CALL_EXPORT_FILES()
+        # self.EXPORT_SPEC_FILE()
         self.status.showMessage("Final Export Done!")
         self.status.setStyleSheet("color: rgb(255,255,255)")
 
@@ -924,6 +943,7 @@ class MainWindow(QMainWindow):
     # end of CALL_DIE_PATTERN function
     
     def EXIT_APP(self):
+        self.status.showMessage("Bye")
         self.close()
         return
 
@@ -2269,14 +2289,15 @@ def EXPORT_FILES(table_TableWidget , option):
         # [5] = IUA_PLUS_FILE_CHECKBOX
         # [6] = CRD_PLUS_FILE_CHECKBOX
     
+    if not os.path.exists("paths.txt"):
+        return "paths.txt file does not existed.", option
+    
     # Call ExportOption dialog and get choices
     export_options  = ExportOption(option)
     option          = export_options.Return()
-    print(option)
 
     if option.count(False) == len(option):
-        print("No any export!")
-        return 0, option
+        return "No any files were exported!", option # return 0, option (0: no any exported files!)
 
     if option[0] == True:
         print(EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE())
@@ -2304,7 +2325,7 @@ def EXPORT_FILES(table_TableWidget , option):
         if option[6] == True:
             print(EXPORT_CRD_PLUS_FILE())
 
-    return 1, option
+    return "Run", option
 # End of EXPORT_FILES function
 
 # Start class SplashScreen
@@ -2537,19 +2558,55 @@ class ExportOption(QDialog):
         self.CHOOSE_ALL_BUTTON.clicked.connect(self.CHOOSE_ALL_FILE)
         self.CLEAR_ALL_BUTTON.clicked.connect(self.CLEAR_ALL_FILE)
 
+        # Layout
         self.hlayout = QHBoxLayout()
         self.hlayout.addWidget(self.CLEAR_ALL_BUTTON)
         self.hlayout.addWidget(self.CHOOSE_ALL_BUTTON)
         self.hlayout.addWidget(self.buttonBox)
         
+        self.Edit_radioButton = QRadioButton(REVISION_STATUS[0])
+        self.Release_radioButton = QRadioButton(REVISION_STATUS[1])
+        self.Override_radioButton = QRadioButton(REVISION_STATUS[2])
+        self.Edit_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Release_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Override_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        
+        self.radioButton = []
+        for i in range(len(REVISION_STATUS)):
+            self.radioButton.append(self.QRadioButton(REVISION_STATUS[i]))
+        
+        self.radioButtonGroup = QRadioButtonGroup()
+        for i in range(len(option)-1):
+            self.radioButtonGroup.append
+        
+        self.ApplyAll_checkBox = QCheckBox("Apply All")
+        self.ApplyAll_checkBox.setStyleSheet(APPLY_ALL_CHECK_BOX_STYLE_SHEET)
+        self.ApplyAll_checkBox.setChecked(False)
+        
+        self.vlayout1 = QVBoxLayout()
+        self.vlayout1.addWidget(self.title)
+        
+        self.gridLayout = QGridLayout()
+        self.gridLayout.addWidget(self.Edit_radioButton, 0,1)
+        self.gridLayout.addWidget(self.Release_radioButton, 0,2)
+        self.gridLayout.addWidget(self.Override_radioButton, 0,3)
+        self.gridLayout.addWidget(self.ApplyAll_checkBox, 0,4)
+        
+        self.gridLayout.addWidget(self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX, 1,0)
+        self.gridLayout.addWidget(self.ARRAY_FULL_SIZE_FILE_CHECKBOX, 2, 0)
+        self.gridLayout.addWidget(self.PROBE_HEAD_XY_FILE_CHECKBOX, 3, 0)
+        self.gridLayout.addWidget(self.PCB_PADS_LOCATION_FILE_CHECKBOX, 4, 0)
+        self.gridLayout.addWidget(self.IUA_PLUS_FILE_CHECKBOX, 5, 0)
+        self.gridLayout.addWidget(self.CRD_PLUS_FILE_CHECKBOX, 6, 0)
+        
+        for i in range(len(option)-1):
+            self.gridLayout.addWidget(self.radioButton1[i], i+1,1)
+            self.gridLayout.addWidget(self.radioButton2[i], i+1,2)
+            self.gridLayout.addWidget(self.radioButton3[i], i+1,3)
+
         self.vlayout = QVBoxLayout()
-        self.vlayout.addWidget(self.title)
-        self.vlayout.addWidget(self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX)
-        self.vlayout.addWidget(self.ARRAY_FULL_SIZE_FILE_CHECKBOX)
-        self.vlayout.addWidget(self.PROBE_HEAD_XY_FILE_CHECKBOX)
-        self.vlayout.addWidget(self.PCB_PADS_LOCATION_FILE_CHECKBOX)
-        self.vlayout.addWidget(self.IUA_PLUS_FILE_CHECKBOX)
-        self.vlayout.addWidget(self.CRD_PLUS_FILE_CHECKBOX)
+        self.vlayout.addLayout(self.vlayout1)
+        self.vlayout.addLayout(self.gridLayout)
         self.vlayout.addLayout(self.hlayout)
         self.setLayout(self.vlayout)
         self.show()
