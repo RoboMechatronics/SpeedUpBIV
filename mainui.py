@@ -2287,7 +2287,7 @@ def EXPORT_FILES(table_TableWidget , option):
     # export_options include: 
         # [0] = ALL_FILE_CHECK
         # [1] = XY_FORMAT_FOR_IUA_PLUS_CHECKBOX
-        # [2] = ARRAY_FULL_SIZE_FILE_CHECKBOX
+        # [2] = ARRAY_FULL_SITE_FILE_CHECKBOX
         # [3] = PROBE_HEAD_XY_FILE_CHECKBOX
         # [4] = PCB_PADS_LOCATION_FILE_CHECKBOX
         # [5] = IUA_PLUS_FILE_CHECKBOX
@@ -2297,8 +2297,47 @@ def EXPORT_FILES(table_TableWidget , option):
         return "paths.txt file does not existed.", option
     
     # Call ExportOption dialog and get choices
-    export_options  = ExportOption(option)
+    status = [XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[0]],
+              XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[1]],
+              XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[2]],
+              ARRAY_FULL_SITE_EXPORT_STATUS[REVISION_STATUS[0]],
+              ARRAY_FULL_SITE_EXPORT_STATUS[REVISION_STATUS[1]],
+              ARRAY_FULL_SITE_EXPORT_STATUS[REVISION_STATUS[2]],
+              PROBE_HEAD_XY_FILE_EXPORT_STATUS[REVISION_STATUS[0]],
+              PROBE_HEAD_XY_FILE_EXPORT_STATUS[REVISION_STATUS[1]],
+              PROBE_HEAD_XY_FILE_EXPORT_STATUS[REVISION_STATUS[2]],
+              PCB_PAD_LOCATION_EXPORT_STATUS[REVISION_STATUS[0]],
+              PCB_PAD_LOCATION_EXPORT_STATUS[REVISION_STATUS[1]],
+              PCB_PAD_LOCATION_EXPORT_STATUS[REVISION_STATUS[2]],
+              IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[0]],
+              IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[1]],
+              IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[2]],
+              CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[0]],
+              CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[1]],
+              CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[2]],
+              ]
+    
+    export_options  = ExportOption(option, status)
     option          = export_options.Return()
+    
+    XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[0]], \
+    XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[1]], \
+    XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[2]], \
+    ARRAY_FULL_SITE_EXPORT_STATUS[REVISION_STATUS[0]], \
+    ARRAY_FULL_SITE_EXPORT_STATUS[REVISION_STATUS[1]], \
+    ARRAY_FULL_SITE_EXPORT_STATUS[REVISION_STATUS[2]], \
+    PROBE_HEAD_XY_FILE_EXPORT_STATUS[REVISION_STATUS[0]], \
+    PROBE_HEAD_XY_FILE_EXPORT_STATUS[REVISION_STATUS[1]], \
+    PROBE_HEAD_XY_FILE_EXPORT_STATUS[REVISION_STATUS[2]], \
+    PCB_PAD_LOCATION_EXPORT_STATUS[REVISION_STATUS[0]], \
+    PCB_PAD_LOCATION_EXPORT_STATUS[REVISION_STATUS[1]], \
+    PCB_PAD_LOCATION_EXPORT_STATUS[REVISION_STATUS[2]], \
+    IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[0]], \
+    IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[1]], \
+    IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[2]], \
+    CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[0]], \
+    CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[1]], \
+    CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[2]], = export_options.Return_status()
 
     if option.count(False) == len(option):
         return "No any files were exported!", option # return 0, option (0: no any exported files!)
@@ -2504,12 +2543,37 @@ class SplashScreen(QDialog):
 
 # Start class ExportOption
 class ExportOption(QDialog):
-    def __init__(self, option):
+    def __init__(self, option, status):
         # option parameters, option variable is a list 
-        # 0.export_all_files                      1.export_XY_FORMAT_FOR_IUA_PLUS_file
+        # 0.export_all_files                     1.export_XY_FORMAT_FOR_IUA_PLUS_file
         # 2.export_ARRAY_FULL_SIZE_FILE_file     3.export_PROBE_HEAD_XY_FILE_file
         # 4.export_PCB_PADS_LOCATION_FILE_file   5.export_IUA_PLUS_FILE_file
         # 6.export_CRD_PLUS_FILE_file
+        
+        # status parameters, status variable is a list:
+        # 0 self.Edit_radioButton1_status
+        # 1 self.Release_radioButton1_status
+        # 2 self.Override_radioButton1_status
+        
+        # 3 self.Edit_radioButton2_status
+        # 4 self.Release_radioButton2_status
+        # 5 self.Override_radioButton2_status
+        
+        # 6 self.Edit_radioButton3_status
+        # 7 self.Release_radioButton3_status
+        # 8 self.Override_radioButton3_status
+        
+        # 9 self.Edit_radioButton4_status
+        # 10 self.Release_radioButton4_status
+        # 11 self.Override_radioButton4_status
+        
+        # 12 self.Edit_radioButton5_status
+        # 13 self.Release_radioButton5_status
+        # 14 self.Override_radioButton5_status
+        
+        # 15 self.Edit_radioButton6_status
+        # 16 self.Release_radioButton6_status
+        # 17 self.Override_radioButton6_status
         
         super().__init__()
         # Dialog Setup
@@ -2526,14 +2590,14 @@ class ExportOption(QDialog):
         self.title.setStyleSheet(GET_INFO_ON_DIALOG)
 
         self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX    = QCheckBox("XY format for IUA+")
-        self.ARRAY_FULL_SIZE_FILE_CHECKBOX      = QCheckBox("Array full sites for reference")
+        self.ARRAY_FULL_SITE_FILE_CHECKBOX      = QCheckBox("Array full sites for reference")
         self.PROBE_HEAD_XY_FILE_CHECKBOX        = QCheckBox("Probe Head XY Coordinates For Approval")
         self.PCB_PADS_LOCATION_FILE_CHECKBOX    = QCheckBox("PCB PADS LOCATION")
         self.IUA_PLUS_FILE_CHECKBOX             = QCheckBox("IUA+")
         self.CRD_PLUS_FILE_CHECKBOX             = QCheckBox("CRD+")
 
         self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX.setStyleSheet(EXPORT_OPTION_CHECK_BOX_STYLE_SHEET)
-        self.ARRAY_FULL_SIZE_FILE_CHECKBOX.setStyleSheet(EXPORT_OPTION_CHECK_BOX_STYLE_SHEET)
+        self.ARRAY_FULL_SITE_FILE_CHECKBOX.setStyleSheet(EXPORT_OPTION_CHECK_BOX_STYLE_SHEET)
         self.PROBE_HEAD_XY_FILE_CHECKBOX.setStyleSheet(EXPORT_OPTION_CHECK_BOX_STYLE_SHEET)
         self.PCB_PADS_LOCATION_FILE_CHECKBOX.setStyleSheet(EXPORT_OPTION_CHECK_BOX_STYLE_SHEET)
         self.IUA_PLUS_FILE_CHECKBOX.setStyleSheet(EXPORT_OPTION_CHECK_BOX_STYLE_SHEET)
@@ -2541,24 +2605,29 @@ class ExportOption(QDialog):
 
         self.ALL_FILE_CHECK = option[0]
         self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX.setChecked(option[1])         
-        self.ARRAY_FULL_SIZE_FILE_CHECKBOX.setChecked(option[2])  
+        self.ARRAY_FULL_SITE_FILE_CHECKBOX.setChecked(option[2])  
         self.PROBE_HEAD_XY_FILE_CHECKBOX.setChecked(option[3])    
         self.PCB_PADS_LOCATION_FILE_CHECKBOX.setChecked(option[4])
         self.IUA_PLUS_FILE_CHECKBOX.setChecked(option[5])
         self.CRD_PLUS_FILE_CHECKBOX.setChecked(option[6])
 
         QBtn = QDialogButtonBox.Ok
+        QBtn_cancel = QDialogButtonBox.Cancel
         self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox_Cancel = QDialogButtonBox(QBtn_cancel)
 
         self.CHOOSE_ALL_BUTTON = QPushButton("All files")
         self.CLEAR_ALL_BUTTON  = QPushButton("Clear all")
 
         self.buttonBox.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
+        self.buttonBox_Cancel.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
         self.CHOOSE_ALL_BUTTON.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
         self.CLEAR_ALL_BUTTON.setStyleSheet(CLEAR_EXPORT_OPTION_BUTTON_STYLE_SHEET)
 
         # Set function for buttons
-        self.buttonBox.accepted.connect(self.accept)
+        # self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.accepted.connect(self.Accept)
+        self.buttonBox_Cancel.rejected.connect(self.Reject)
         self.CHOOSE_ALL_BUTTON.clicked.connect(self.CHOOSE_ALL_FILE)
         self.CLEAR_ALL_BUTTON.clicked.connect(self.CLEAR_ALL_FILE)
 
@@ -2566,39 +2635,195 @@ class ExportOption(QDialog):
         self.hlayout = QHBoxLayout()
         self.hlayout.addWidget(self.CLEAR_ALL_BUTTON)
         self.hlayout.addWidget(self.CHOOSE_ALL_BUTTON)
+        self.hlayout.addStretch(1)
         self.hlayout.addWidget(self.buttonBox)
+        self.hlayout.addWidget(self.buttonBox_Cancel)
         
-        self.Edit_radioButton = QRadioButton(REVISION_STATUS[0])
-        self.Release_radioButton = QRadioButton(REVISION_STATUS[1])
-        self.Override_radioButton = QRadioButton(REVISION_STATUS[2])
+        self.Edit_radioButton1_status = status[0]
+        self.Release_radioButton1_status = status[1]
+        self.Override_radioButton1_status = status[2]
+        
+        self.Edit_radioButton2_status = status[3]
+        self.Release_radioButton2_status = status[4]
+        self.Override_radioButton2_status = status[5]
+        
+        self.Edit_radioButton3_status = status[6]
+        self.Release_radioButton3_status = status[7]
+        self.Override_radioButton3_status = status[8]
+        
+        self.Edit_radioButton4_status = status[9]
+        self.Release_radioButton4_status = status[10]
+        self.Override_radioButton4_status = status[11]
+        
+        self.Edit_radioButton5_status = status[12]
+        self.Release_radioButton5_status = status[13]
+        self.Override_radioButton5_status = status[14]
+        
+        self.Edit_radioButton6_status = status[15]
+        self.Release_radioButton6_status = status[16]
+        self.Override_radioButton6_status = status[17]
+        
+        # Initial radioButton
+        self.Edit_radioButton       = QRadioButton(REVISION_STATUS[0])
+        self.Release_radioButton    = QRadioButton(REVISION_STATUS[1])
+        self.Override_radioButton   = QRadioButton(REVISION_STATUS[2])
+        
+        self.Edit_radioButton1      = QRadioButton(REVISION_STATUS[0])
+        self.Release_radioButton1   = QRadioButton(REVISION_STATUS[1])
+        self.Override_radioButton1  = QRadioButton(REVISION_STATUS[2])
+        
+        self.Edit_radioButton2      = QRadioButton(REVISION_STATUS[0])
+        self.Release_radioButton2   = QRadioButton(REVISION_STATUS[1])
+        self.Override_radioButton2  = QRadioButton(REVISION_STATUS[2])
+        
+        self.Edit_radioButton3      = QRadioButton(REVISION_STATUS[0])
+        self.Release_radioButton3   = QRadioButton(REVISION_STATUS[1])
+        self.Override_radioButton3  = QRadioButton(REVISION_STATUS[2])
+        
+        self.Edit_radioButton4      = QRadioButton(REVISION_STATUS[0])
+        self.Release_radioButton4   = QRadioButton(REVISION_STATUS[1])
+        self.Override_radioButton4  = QRadioButton(REVISION_STATUS[2])
+        
+        self.Edit_radioButton5      = QRadioButton(REVISION_STATUS[0])
+        self.Release_radioButton5   = QRadioButton(REVISION_STATUS[1])
+        self.Override_radioButton5  = QRadioButton(REVISION_STATUS[2])
+        
+        self.Edit_radioButton6      = QRadioButton(REVISION_STATUS[0])
+        self.Release_radioButton6   = QRadioButton(REVISION_STATUS[1])
+        self.Override_radioButton6  = QRadioButton(REVISION_STATUS[2])       
+        
+        #Style sheet
         self.Edit_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
         self.Release_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
         self.Override_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
-
-        self.ApplyAll_checkBox = QCheckBox("Apply All")
-        self.ApplyAll_checkBox.setStyleSheet(APPLY_ALL_CHECK_BOX_STYLE_SHEET)
-        self.ApplyAll_checkBox.setChecked(False)
-
-        self.ResetAll_checkBox = QCheckBox("Reset All")
-        self.ResetAll_checkBox.setStyleSheet(APPLY_ALL_CHECK_BOX_STYLE_SHEET)
-        self.ResetAll_checkBox.setChecked(False)
+        
+        self.Edit_radioButton1.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Release_radioButton1.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Override_radioButton1.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        
+        self.Edit_radioButton2.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Release_radioButton2.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Override_radioButton2.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        
+        self.Edit_radioButton3.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Release_radioButton3.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Override_radioButton3.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        
+        self.Edit_radioButton4.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Release_radioButton4.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Override_radioButton4.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        
+        self.Edit_radioButton5.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Release_radioButton5.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Override_radioButton5.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        
+        self.Edit_radioButton6.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Release_radioButton6.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        self.Override_radioButton6.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
+        
+        # Set radio button group
+        self.radioButton_group1 = QButtonGroup()
+        self.radioButton_group2 = QButtonGroup()
+        self.radioButton_group3 = QButtonGroup()
+        self.radioButton_group4 = QButtonGroup()
+        self.radioButton_group5 = QButtonGroup()
+        self.radioButton_group6 = QButtonGroup()
+        
+        self.radioButton_group1.addButton(self.Edit_radioButton1)
+        self.radioButton_group1.addButton(self.Release_radioButton1)
+        self.radioButton_group1.addButton(self.Override_radioButton1)
+        
+        self.radioButton_group2.addButton(self.Edit_radioButton2)
+        self.radioButton_group2.addButton(self.Release_radioButton2)
+        self.radioButton_group2.addButton(self.Override_radioButton2)
+        
+        self.radioButton_group3.addButton(self.Edit_radioButton3)
+        self.radioButton_group3.addButton(self.Release_radioButton3)
+        self.radioButton_group3.addButton(self.Override_radioButton3)
+        
+        self.radioButton_group4.addButton(self.Edit_radioButton4)
+        self.radioButton_group4.addButton(self.Release_radioButton4)
+        self.radioButton_group4.addButton(self.Override_radioButton4)
+        
+        self.radioButton_group5.addButton(self.Edit_radioButton5)
+        self.radioButton_group5.addButton(self.Release_radioButton5)
+        self.radioButton_group5.addButton(self.Override_radioButton5)
+        
+        self.radioButton_group6.addButton(self.Edit_radioButton6)
+        self.radioButton_group6.addButton(self.Release_radioButton6)
+        self.radioButton_group6.addButton(self.Override_radioButton6)
+        
+        self.Edit_radioButton.setChecked(False)
+        self.Release_radioButton.setChecked(False)
+        self.Override_radioButton.setChecked(False)
+        
+        self.Edit_radioButton1.setChecked(self.Edit_radioButton1_status)
+        self.Release_radioButton1.setChecked(self.Release_radioButton1_status)
+        self.Override_radioButton1.setChecked(self.Override_radioButton1_status)
+        
+        self.Edit_radioButton2.setChecked(self.Edit_radioButton2_status)
+        self.Release_radioButton2.setChecked(self.Release_radioButton2_status)
+        self.Override_radioButton2.setChecked(self.Override_radioButton2_status)
+        
+        self.Edit_radioButton3.setChecked(self.Edit_radioButton3_status)
+        self.Release_radioButton3.setChecked(self.Release_radioButton3_status)
+        self.Override_radioButton3.setChecked(self.Override_radioButton3_status)
+        
+        self.Edit_radioButton4.setChecked(self.Edit_radioButton4_status)
+        self.Release_radioButton4.setChecked(self.Release_radioButton4_status)
+        self.Override_radioButton4.setChecked(self.Override_radioButton4_status)
+        
+        self.Edit_radioButton5.setChecked(self.Edit_radioButton5_status)
+        self.Release_radioButton5.setChecked(self.Release_radioButton5_status)
+        self.Override_radioButton5.setChecked(self.Override_radioButton5_status)
+        
+        self.Edit_radioButton6.setChecked(self.Edit_radioButton6_status)
+        self.Release_radioButton6.setChecked(self.Release_radioButton6_status)
+        self.Override_radioButton6.setChecked(self.Override_radioButton6_status)
+        
+        self.Edit_radioButton.toggled.connect(self.Edit_radioButton_Clicked)
+        self.Release_radioButton.toggled.connect(self.Release_radioButton_Clicked)
+        self.Override_radioButton.toggled.connect(self.Override_radioButton_Clicked)
         
         self.vlayout1 = QVBoxLayout()
         self.vlayout1.addWidget(self.title)
         
         self.gridLayout = QGridLayout()
-        self.gridLayout.addWidget(self.Edit_radioButton, 0,1)
-        self.gridLayout.addWidget(self.Release_radioButton, 0,2)
-        self.gridLayout.addWidget(self.Override_radioButton, 0,3)
-        self.gridLayout.addWidget(self.ApplyAll_checkBox, 0,4)
+        self.gridLayout.addWidget(self.Edit_radioButton,                0,  1)
+        self.gridLayout.addWidget(self.Release_radioButton,             0,  2)
+        self.gridLayout.addWidget(self.Override_radioButton,            0,  3)
+
+        self.gridLayout.addWidget(self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX, 1,  0)
+        self.gridLayout.addWidget(self.ARRAY_FULL_SITE_FILE_CHECKBOX,   2,  0)
+        self.gridLayout.addWidget(self.PROBE_HEAD_XY_FILE_CHECKBOX,     3,  0)
+        self.gridLayout.addWidget(self.PCB_PADS_LOCATION_FILE_CHECKBOX, 4,  0)
+        self.gridLayout.addWidget(self.IUA_PLUS_FILE_CHECKBOX,          5,  0)
+        self.gridLayout.addWidget(self.CRD_PLUS_FILE_CHECKBOX,          6,  0)
         
-        self.gridLayout.addWidget(self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX, 1,0)
-        self.gridLayout.addWidget(self.ARRAY_FULL_SIZE_FILE_CHECKBOX, 2, 0)
-        self.gridLayout.addWidget(self.PROBE_HEAD_XY_FILE_CHECKBOX, 3, 0)
-        self.gridLayout.addWidget(self.PCB_PADS_LOCATION_FILE_CHECKBOX, 4, 0)
-        self.gridLayout.addWidget(self.IUA_PLUS_FILE_CHECKBOX, 5, 0)
-        self.gridLayout.addWidget(self.CRD_PLUS_FILE_CHECKBOX, 6, 0)
-           
+        self.gridLayout.addWidget(self.Edit_radioButton1,       1,      1)
+        self.gridLayout.addWidget(self.Release_radioButton1,    1,      2)
+        self.gridLayout.addWidget(self.Override_radioButton1,   1,      3)
+        
+        self.gridLayout.addWidget(self.Edit_radioButton2,       2,      1)
+        self.gridLayout.addWidget(self.Release_radioButton2,    2,      2)
+        self.gridLayout.addWidget(self.Override_radioButton2,   2,      3)
+        
+        self.gridLayout.addWidget(self.Edit_radioButton3,       3,      1)
+        self.gridLayout.addWidget(self.Release_radioButton3,    3,      2)
+        self.gridLayout.addWidget(self.Override_radioButton3,   3,      3)
+        
+        self.gridLayout.addWidget(self.Edit_radioButton4,       4,      1)
+        self.gridLayout.addWidget(self.Release_radioButton4,    4,      2)
+        self.gridLayout.addWidget(self.Override_radioButton4,   4,      3)
+        
+        self.gridLayout.addWidget(self.Edit_radioButton5,       5,      1)
+        self.gridLayout.addWidget(self.Release_radioButton5,    5,      2)
+        self.gridLayout.addWidget(self.Override_radioButton5,   5,      3)
+        
+        self.gridLayout.addWidget(self.Edit_radioButton6,       6,      1)
+        self.gridLayout.addWidget(self.Release_radioButton6,    6,      2)
+        self.gridLayout.addWidget(self.Override_radioButton6,   6,      3)
+        
         self.vlayout = QVBoxLayout()
         self.vlayout.addLayout(self.vlayout1)
         self.vlayout.addLayout(self.gridLayout)
@@ -2611,7 +2836,7 @@ class ExportOption(QDialog):
     def CHOOSE_ALL_FILE(self):
         self.ALL_FILE_CHECK = True
         self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX.setChecked(self.ALL_FILE_CHECK)         
-        self.ARRAY_FULL_SIZE_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)  
+        self.ARRAY_FULL_SITE_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)  
         self.PROBE_HEAD_XY_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)    
         self.PCB_PADS_LOCATION_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
         self.IUA_PLUS_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
@@ -2621,29 +2846,164 @@ class ExportOption(QDialog):
     def CLEAR_ALL_FILE(self):
         self.ALL_FILE_CHECK = False
         self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX.setChecked(self.ALL_FILE_CHECK)         
-        self.ARRAY_FULL_SIZE_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)  
+        self.ARRAY_FULL_SITE_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)  
         self.PROBE_HEAD_XY_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)    
         self.PCB_PADS_LOCATION_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
         self.IUA_PLUS_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
         self.CRD_PLUS_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
+    
+    def Edit_radioButton_Clicked(self):
+        status = self.Edit_radioButton.isChecked()
+        if status == True:
+            self.Edit_radioButton1_status       = True
+            self.Release_radioButton1_status    = False
+            self.Override_radioButton1_status   = False
+            
+            self.Edit_radioButton2_status       = True
+            self.Release_radioButton2_status    = False
+            self.Override_radioButton2_status   = False
+            
+            self.Edit_radioButton3_status       = True
+            self.Release_radioButton3_status    = False
+            self.Override_radioButton3_status   = False
+            
+            self.Edit_radioButton4_status       = True
+            self.Release_radioButton4_status    = False
+            self.Override_radioButton4_status   = False
+            
+            self.Edit_radioButton5_status       = True
+            self.Release_radioButton5_status    = False
+            self.Override_radioButton5_status   = False
+            
+            self.Edit_radioButton6_status       = True
+            self.Release_radioButton6_status    = False
+            self.Override_radioButton6_status   = False
+    
+    def Release_radioButton_Clicked(self):
+        status = self.Release_radioButton.isChecked()
+        if status == True:
+            self.Edit_radioButton1_status       = False
+            self.Release_radioButton1_status    = True
+            self.Override_radioButton1_status   = False
+            
+            self.Edit_radioButton2_status       = False
+            self.Release_radioButton2_status    = True
+            self.Override_radioButton2_status   = False
+            
+            self.Edit_radioButton3_status       = False
+            self.Release_radioButton3_status    = True
+            self.Override_radioButton3_status   = False
+            
+            self.Edit_radioButton4_status       = False
+            self.Release_radioButton4_status    = True
+            self.Override_radioButton4_status   = False
+            
+            self.Edit_radioButton5_status       = False
+            self.Release_radioButton5_status    = True
+            self.Override_radioButton5_status   = False
+            
+            self.Edit_radioButton6_status       = False
+            self.Release_radioButton6_status    = True
+            self.Override_radioButton6_status   = False
+    
+    def Override_radioButton_Clicked(self):
+        status = self.Override_radioButton.isChecked()
+        if status == True:
+            self.Edit_radioButton1_status       = False
+            self.Release_radioButton1_status    = False
+            self.Override_radioButton1_status   = True
+            
+            self.Edit_radioButton2_status       = False
+            self.Release_radioButton2_status    = False
+            self.Override_radioButton2_status   = True
+            
+            self.Edit_radioButton3_status       = False
+            self.Release_radioButton3_status    = False
+            self.Override_radioButton3_status   = True
+            
+            self.Edit_radioButton4_status       = False
+            self.Release_radioButton4_status    = False
+            self.Override_radioButton4_status   = True
+            
+            self.Edit_radioButton5_status       = False
+            self.Release_radioButton5_status    = False
+            self.Override_radioButton5_status   = True
+            
+            self.Edit_radioButton6_status       = False
+            self.Release_radioButton6_status    = False
+            self.Override_radioButton6_status   = True                  
+    
+    def Accept(self):
+
+        self.Edit_radioButton1.setChecked(self.Edit_radioButton1_status)
+        self.Release_radioButton1.setChecked(self.Release_radioButton1_status)
+        self.Override_radioButton1.setChecked(self.Override_radioButton1_status)
+
+        self.Edit_radioButton2.setChecked(self.Edit_radioButton2_status)
+        self.Release_radioButton2.setChecked(self.Release_radioButton2_status)
+        self.Override_radioButton2.setChecked(self.Override_radioButton2_status)
+
+        self.Edit_radioButton3.setChecked(self.Edit_radioButton3_status)
+        self.Release_radioButton3.setChecked(self.Release_radioButton3_status)
+        self.Override_radioButton3.setChecked(self.Override_radioButton3_status)
+
+        self.Edit_radioButton4.setChecked(self.Edit_radioButton4_status)
+        self.Release_radioButton4.setChecked(self.Release_radioButton4_status)
+        self.Override_radioButton4.setChecked(self.Override_radioButton4_status)
+
+        self.Edit_radioButton5.setChecked(self.Edit_radioButton5_status)
+        self.Release_radioButton5.setChecked(self.Release_radioButton5_status)
+        self.Override_radioButton5.setChecked(self.Override_radioButton5_status)
+
+        self.Edit_radioButton6.setChecked(self.Edit_radioButton6_status)
+        self.Release_radioButton6.setChecked(self.Release_radioButton6_status)
+        self.Override_radioButton6.setChecked(self.Override_radioButton6_status)
+        
+        self.close()
+        
+        return
+    
+    def Reject(self):
+        self.close()
+        return
     
     # class ExportOption
     def Return(self):
         # return PARAMETERS: 
         # [0] = ALL_FILE_CHECK
         # [1] = XY_FORMAT_FOR_IUA_PLUS_CHECKBOX
-        # [2] = ARRAY_FULL_SIZE_FILE_CHECKBOX
+        # [2] = ARRAY_FULL_SITE_FILE_CHECKBOX
         # [3] = PROBE_HEAD_XY_FILE_CHECKBOX
         # [4] = PCB_PADS_LOCATION_FILE_CHECKBOX
         # [5] = IUA_PLUS_FILE_CHECKBOX
         # [6] = CRD_PLUS_FILE_CHECKBOX
         return self.ALL_FILE_CHECK, \
                self.XY_FORMAT_FOR_IUA_PLUS_CHECKBOX.isChecked(), \
-               self.ARRAY_FULL_SIZE_FILE_CHECKBOX.isChecked(), \
+               self.ARRAY_FULL_SITE_FILE_CHECKBOX.isChecked(), \
                self.PROBE_HEAD_XY_FILE_CHECKBOX.isChecked(), \
                self.PCB_PADS_LOCATION_FILE_CHECKBOX.isChecked(), \
                self.IUA_PLUS_FILE_CHECKBOX.isChecked(), \
                self.CRD_PLUS_FILE_CHECKBOX.isChecked() \
+    
+    def Return_status(self):
+        return self.Edit_radioButton1.isChecked(), \
+                self.Release_radioButton1.isChecked(), \
+                self.Override_radioButton1.isChecked(), \
+                self.Edit_radioButton2.isChecked(), \
+                self.Release_radioButton2.isChecked(), \
+                self.Override_radioButton2.isChecked(), \
+                self.Edit_radioButton3.isChecked(), \
+                self.Release_radioButton3.isChecked(), \
+                self.Override_radioButton3.isChecked(), \
+                self.Edit_radioButton4.isChecked(), \
+                self.Release_radioButton4.isChecked(), \
+                self.Override_radioButton4.isChecked(), \
+                self.Edit_radioButton5.isChecked(), \
+                self.Release_radioButton5.isChecked(), \
+                self.Override_radioButton5.isChecked(), \
+                self.Edit_radioButton6.isChecked(), \
+                self.Release_radioButton6.isChecked(), \
+                self.Override_radioButton6.isChecked(), \
     
     # class ExportOption
     def mouseMoveEvent(self, event):

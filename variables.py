@@ -594,6 +594,7 @@ EXPORT_OPTION_CHECK_BOX_STYLE_SHEET = """
                                     border: 0px;
                                 }
                             """  
+                            
 EXPORT_OPTION_BUTTON_STYLE_SHEET="""
                                     QPushButton {
                                         font: 15px 3ds;
@@ -611,7 +612,8 @@ EXPORT_OPTION_BUTTON_STYLE_SHEET="""
                                     QPushButton:pressed {
                                         background-color: rgba(255,255,255,0.5);
                                         border: 0px;
-                                    }"""    
+                                    }""" 
+                                       
 CLEAR_EXPORT_OPTION_BUTTON_STYLE_SHEET="""
                                             QPushButton {
                                                 font: 15px 3ds;
@@ -670,7 +672,25 @@ APPLY_ALL_CHECK_BOX_STYLE_SHEET = """
                                     border-radius:10px;
                                     border: 0px;
                                 }
-                            """  
+                            """
+APPLY_ALL_REVISION_OPTION_STYLE_SHEET="""
+                                    QPushButton {
+                                        font: 12px 3ds;
+                                        background-color: rgba(100,100,100,0);
+                                        min-width: 20px;
+                                        min-height: 20px;
+                                        border: 0px;
+                                    }
+
+                                    QPushButton:hover {
+                                        background: #33CC33;
+                                        border: 0px;
+                                    }
+
+                                    QPushButton:pressed {
+                                        background-color: rgba(255,255,255,0.5);
+                                        border: 0px;
+                                    }"""   
 # End of Styles
 
 # Paths
@@ -679,14 +699,50 @@ XY_LIST_SV_FORMAT_HEADER_LIST = ['SITE#/DUT#', 'PAD#', 'X Coordinate (um)', 'Y C
 
 # EXPORTED FILES FORMAT
 PROBE_HEAD_XY_SHEETS_NAME = ['History of Revision', 'XY Coordinates']
-PROBE_HEAD_XY_TEMPLATE_FILENAME = 'YYY-XXXXXX-xx-Probe Head XY Coordinates For Approval Rev00.xlsx'
-PROBE_HEAD_XY_TEMPLATE_FULLPATH = 'templates/' + PROBE_HEAD_XY_TEMPLATE_FILENAME
-PROBE_HEAD_XY_FULLPATH = 'result/PART-NUMBER-xx-Probe Head XY Coordinates For Approval Rev00.xlsx'
+# PROBE_HEAD_XY_TEMPLATE_FILENAME = 'YYY-XXXXXX-xx-Probe Head XY Coordinates For Approval Rev00.xlsx'
+# PROBE_HEAD_XY_TEMPLATE_FULLPATH = 'templates/' + PROBE_HEAD_XY_TEMPLATE_FILENAME
+# PROBE_HEAD_XY_FULLPATH = 'result/PART-NUMBER-xx-Probe Head XY Coordinates For Approval Rev00.xlsx'
 
 ARRAY_FULL_SITE_SHEET_NAME = ['Revision', 'XY list']
-ARRAY_FULL_SITE_TEMPLATE_FILENAME = 'YYY-XXXXXX_Array full sites for reference_Rev00.xlsx'
-ARRAY_FULL_SITE_TEMPLATE_FULLPATH = 'templates/' + ARRAY_FULL_SITE_TEMPLATE_FILENAME
-ARRAY_FULL_SITE_FULLPATH = 'result/PART-NUMBER-xx_Array full sites for reference_Rev00.xlsx'
+# ARRAY_FULL_SITE_TEMPLATE_FILENAME = 'YYY-XXXXXX_Array full sites for reference_Rev00.xlsx'
+# ARRAY_FULL_SITE_TEMPLATE_FULLPATH = 'templates/' + ARRAY_FULL_SITE_TEMPLATE_FILENAME
+# ARRAY_FULL_SITE_FULLPATH = 'result/PART-NUMBER-xx_Array full sites for reference_Rev00.xlsx'
+
+XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS = {
+    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[1]: False, # Release
+    REVISION_STATUS[2]: True, # Override
+}
+
+ARRAY_FULL_SITE_EXPORT_STATUS = {
+    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[1]: False, # Release
+    REVISION_STATUS[2]: True, # Override
+}
+
+PROBE_HEAD_XY_FILE_EXPORT_STATUS = {
+    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[1]: False, # Release
+    REVISION_STATUS[2]: True, # Override
+}
+
+PCB_PAD_LOCATION_EXPORT_STATUS = {
+    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[1]: False, # Release
+    REVISION_STATUS[2]: True, # Override
+}
+
+IUA_PLUS_EXPORT_STATUS = {
+    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[1]: False, # Release
+    REVISION_STATUS[2]: True, # Override
+}
+
+CRD_PLUS_EXPORT_STATUS = {
+    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[1]: False, # Release
+    REVISION_STATUS[2]: True, # Override
+}
 
 # NC (not connect) Definition
 NC_OPTION = ['No Probe, No Drill Hole', "No Probe, Drill Hole"]
