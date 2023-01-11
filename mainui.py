@@ -1081,15 +1081,18 @@ class TableWindow(QWidget):
     
     # class TableWindow(QWidget):
     def keyPressEvent(self, event):
-        super().keyPressEvent(event)
-        
-        if event.key() == Qt.Key_C and(event.modifiers() & Qt.ControlModifier):
-            self.copied_cells = sorted(self.TableWidget.selectedIndexes())
-        
-        elif event.key() == Qt.Key_V and(event.modifiers() & Qt.ControlModifier):
-            r = self.currentRow() - self.copied_cells[0].row()
-            c = self.currentColumn() - self.copied_cells[0].column()
-            [self.setItem(cell.row() + r, cell.column() + c, QTableWidgetItem(cell.data())) for cell in self.copied_cells]
+        try:
+            super().keyPressEvent(event)
+            
+            if event.key() == Qt.Key_C and(event.modifiers() & Qt.ControlModifier):
+                self.copied_cells = sorted(self.TableWidget.selectedIndexes())
+            
+            elif event.key() == Qt.Key_V and(event.modifiers() & Qt.ControlModifier):
+                r = self.currentRow() - self.copied_cells[0].row()
+                c = self.currentColumn() - self.copied_cells[0].column()
+                [self.setItem(cell.row() + r, cell.column() + c, QTableWidgetItem(cell.data())) for cell in self.copied_cells]
+        except:
+            pass
 # End of TableWindow class #
 
 class ASK_UNIT(QDialog):
@@ -2074,7 +2077,8 @@ class GetInfo(QDialog):
         if test_temp        == "" or test_temp == "0":
             test_temp       = 0.0
         else:
-            test_temp       = np.float16(test_temp)
+            # test_temp       = np.float16(test_temp)
+            test_temp       = test_temp
 
         if max_current        == "" or max_current == "0":
             max_current       = 0.0
@@ -2570,18 +2574,14 @@ class ExportOption(QDialog):
         self.Edit_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
         self.Release_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
         self.Override_radioButton.setStyleSheet(EXPORT_OPTION_RADIO_BUTTON_STYLE_SHEET)
-        
-        self.radioButton = []
-        for i in range(len(REVISION_STATUS)):
-            self.radioButton.append(self.QRadioButton(REVISION_STATUS[i]))
-        
-        self.radioButtonGroup = QRadioButtonGroup()
-        for i in range(len(option)-1):
-            self.radioButtonGroup.append
-        
+
         self.ApplyAll_checkBox = QCheckBox("Apply All")
         self.ApplyAll_checkBox.setStyleSheet(APPLY_ALL_CHECK_BOX_STYLE_SHEET)
         self.ApplyAll_checkBox.setChecked(False)
+
+        self.ResetAll_checkBox = QCheckBox("Reset All")
+        self.ResetAll_checkBox.setStyleSheet(APPLY_ALL_CHECK_BOX_STYLE_SHEET)
+        self.ResetAll_checkBox.setChecked(False)
         
         self.vlayout1 = QVBoxLayout()
         self.vlayout1.addWidget(self.title)
@@ -2598,12 +2598,7 @@ class ExportOption(QDialog):
         self.gridLayout.addWidget(self.PCB_PADS_LOCATION_FILE_CHECKBOX, 4, 0)
         self.gridLayout.addWidget(self.IUA_PLUS_FILE_CHECKBOX, 5, 0)
         self.gridLayout.addWidget(self.CRD_PLUS_FILE_CHECKBOX, 6, 0)
-        
-        for i in range(len(option)-1):
-            self.gridLayout.addWidget(self.radioButton1[i], i+1,1)
-            self.gridLayout.addWidget(self.radioButton2[i], i+1,2)
-            self.gridLayout.addWidget(self.radioButton3[i], i+1,3)
-
+           
         self.vlayout = QVBoxLayout()
         self.vlayout.addLayout(self.vlayout1)
         self.vlayout.addLayout(self.gridLayout)
