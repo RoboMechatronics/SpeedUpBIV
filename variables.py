@@ -170,9 +170,9 @@ PROBE_PART_NUMBER = {
     "PART_NUMBER": "",
 }
 
-REVISION_STATUS = ["Edit", "Release", "Override"]
-EDIT_REVISION = ["01 to 02", "A01 to A02", "A to A01"]
-RELEASE_REVISION = ['01 to A', "A01 to B", "A to B"]
+REVISION_STATUS     = ["Edit", "Release", "Override"]
+EDIT_REVISION       = ["01 to 02", "A01 to A02", "A to A01"]
+RELEASE_REVISION    = ['01 to A', "A01 to B", "A to B"]
 
 # Styles
 MainStyleSheet = """

@@ -2141,7 +2141,7 @@ class GetInfo(QDialog):
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPosition = event.globalPos()
         except:
-            return
+            pass
 
     # class GetInfo(QDialog):
     # Set up move window by clicked mouse
@@ -2149,7 +2149,7 @@ class GetInfo(QDialog):
         try:
             self.oldPosition = event.globalPos()
         except:
-            return
+            pass
 # End of GetInfo class
 
 # Start GENERATE_XY_LIST_SV_FORMAT function
@@ -2264,14 +2264,14 @@ class Notification(QDialog):
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPosition = event.globalPos()
         except:
-            return
+            pass
 
     # Set up move window by clicked mouse
     def mousePressEvent(self, event):
         try:
             self.oldPosition = event.globalPos()
         except:
-            return
+            pass
     
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -2531,7 +2531,7 @@ class SplashScreen(QDialog):
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPosition = event.globalPos()
         except:
-            return
+            pass
     
     # class SplashScreen
     # Set up move window by clicked mouse
@@ -2539,7 +2539,7 @@ class SplashScreen(QDialog):
         try:
             self.oldPosition = event.globalPos()
         except:
-            return
+            pass
 
 # Start class ExportOption
 class ExportOption(QDialog):
@@ -2611,57 +2611,49 @@ class ExportOption(QDialog):
         self.IUA_PLUS_FILE_CHECKBOX.setChecked(option[5])
         self.CRD_PLUS_FILE_CHECKBOX.setChecked(option[6])
 
-        QBtn = QDialogButtonBox.Ok
-        QBtn_cancel = QDialogButtonBox.Cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox_Cancel = QDialogButtonBox(QBtn_cancel)
+        QBtn_ok                 = QDialogButtonBox.Ok
+        QBtn_cancel             = QDialogButtonBox.Cancel
+        self.buttonBox_ok       = QDialogButtonBox(QBtn_ok)
+        self.buttonBox_cancel   = QDialogButtonBox(QBtn_cancel)
 
         self.CHOOSE_ALL_BUTTON = QPushButton("All files")
         self.CLEAR_ALL_BUTTON  = QPushButton("Clear all")
 
-        self.buttonBox.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
-        self.buttonBox_Cancel.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
+        self.buttonBox_ok.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
+        self.buttonBox_cancel.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
         self.CHOOSE_ALL_BUTTON.setStyleSheet(EXPORT_OPTION_BUTTON_STYLE_SHEET)
         self.CLEAR_ALL_BUTTON.setStyleSheet(CLEAR_EXPORT_OPTION_BUTTON_STYLE_SHEET)
 
         # Set function for buttons
-        # self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.accepted.connect(self.Accept)
-        self.buttonBox_Cancel.rejected.connect(self.Reject)
+        self.buttonBox_ok.accepted.connect(self.Accept)
+        self.buttonBox_cancel.rejected.connect(self.Reject)
         self.CHOOSE_ALL_BUTTON.clicked.connect(self.CHOOSE_ALL_FILE)
         self.CLEAR_ALL_BUTTON.clicked.connect(self.CLEAR_ALL_FILE)
-
-        # Layout
-        self.hlayout = QHBoxLayout()
-        self.hlayout.addWidget(self.CLEAR_ALL_BUTTON)
-        self.hlayout.addWidget(self.CHOOSE_ALL_BUTTON)
-        self.hlayout.addStretch(1)
-        self.hlayout.addWidget(self.buttonBox)
-        self.hlayout.addWidget(self.buttonBox_Cancel)
         
-        self.Edit_radioButton1_status = status[0]
-        self.Release_radioButton1_status = status[1]
-        self.Override_radioButton1_status = status[2]
+        # Update status
+        self.Edit_radioButton1_status       = status[0]
+        self.Release_radioButton1_status    = status[1]
+        self.Override_radioButton1_status   = status[2]
         
-        self.Edit_radioButton2_status = status[3]
-        self.Release_radioButton2_status = status[4]
-        self.Override_radioButton2_status = status[5]
+        self.Edit_radioButton2_status       = status[3]
+        self.Release_radioButton2_status    = status[4]
+        self.Override_radioButton2_status   = status[5]
         
-        self.Edit_radioButton3_status = status[6]
-        self.Release_radioButton3_status = status[7]
-        self.Override_radioButton3_status = status[8]
+        self.Edit_radioButton3_status       = status[6]
+        self.Release_radioButton3_status    = status[7]
+        self.Override_radioButton3_status   = status[8]
         
-        self.Edit_radioButton4_status = status[9]
-        self.Release_radioButton4_status = status[10]
-        self.Override_radioButton4_status = status[11]
+        self.Edit_radioButton4_status       = status[9]
+        self.Release_radioButton4_status    = status[10]
+        self.Override_radioButton4_status   = status[11]
         
-        self.Edit_radioButton5_status = status[12]
-        self.Release_radioButton5_status = status[13]
-        self.Override_radioButton5_status = status[14]
+        self.Edit_radioButton5_status       = status[12]
+        self.Release_radioButton5_status    = status[13]
+        self.Override_radioButton5_status   = status[14]
         
-        self.Edit_radioButton6_status = status[15]
-        self.Release_radioButton6_status = status[16]
-        self.Override_radioButton6_status = status[17]
+        self.Edit_radioButton6_status       = status[15]
+        self.Release_radioButton6_status    = status[16]
+        self.Override_radioButton6_status   = status[17]
         
         # Initial radioButton
         self.Edit_radioButton       = QRadioButton(REVISION_STATUS[0])
@@ -2753,6 +2745,7 @@ class ExportOption(QDialog):
         self.radioButton_group6.addButton(self.Release_radioButton6)
         self.radioButton_group6.addButton(self.Override_radioButton6)
         
+        # Update status
         self.Edit_radioButton.setChecked(False)
         self.Release_radioButton.setChecked(False)
         self.Override_radioButton.setChecked(False)
@@ -2781,10 +2774,19 @@ class ExportOption(QDialog):
         self.Release_radioButton6.setChecked(self.Release_radioButton6_status)
         self.Override_radioButton6.setChecked(self.Override_radioButton6_status)
         
+        # Actions
         self.Edit_radioButton.toggled.connect(self.Edit_radioButton_Clicked)
         self.Release_radioButton.toggled.connect(self.Release_radioButton_Clicked)
         self.Override_radioButton.toggled.connect(self.Override_radioButton_Clicked)
         
+        # Layouts
+        self.hlayout = QHBoxLayout()
+        self.hlayout.addWidget(self.CLEAR_ALL_BUTTON)
+        self.hlayout.addWidget(self.CHOOSE_ALL_BUTTON)
+        self.hlayout.addStretch(1) # add a white space
+        self.hlayout.addWidget(self.buttonBox_ok)
+        self.hlayout.addWidget(self.buttonBox_cancel)
+
         self.vlayout1 = QVBoxLayout()
         self.vlayout1.addWidget(self.title)
         
@@ -2800,29 +2802,29 @@ class ExportOption(QDialog):
         self.gridLayout.addWidget(self.IUA_PLUS_FILE_CHECKBOX,          5,  0)
         self.gridLayout.addWidget(self.CRD_PLUS_FILE_CHECKBOX,          6,  0)
         
-        self.gridLayout.addWidget(self.Edit_radioButton1,       1,      1)
-        self.gridLayout.addWidget(self.Release_radioButton1,    1,      2)
-        self.gridLayout.addWidget(self.Override_radioButton1,   1,      3)
+        self.gridLayout.addWidget(self.Edit_radioButton1,               1,  1)
+        self.gridLayout.addWidget(self.Release_radioButton1,            1,  2)
+        self.gridLayout.addWidget(self.Override_radioButton1,           1,  3)
         
-        self.gridLayout.addWidget(self.Edit_radioButton2,       2,      1)
-        self.gridLayout.addWidget(self.Release_radioButton2,    2,      2)
-        self.gridLayout.addWidget(self.Override_radioButton2,   2,      3)
+        self.gridLayout.addWidget(self.Edit_radioButton2,               2,  1)
+        self.gridLayout.addWidget(self.Release_radioButton2,            2,  2)
+        self.gridLayout.addWidget(self.Override_radioButton2,           2,  3)
         
-        self.gridLayout.addWidget(self.Edit_radioButton3,       3,      1)
-        self.gridLayout.addWidget(self.Release_radioButton3,    3,      2)
-        self.gridLayout.addWidget(self.Override_radioButton3,   3,      3)
+        self.gridLayout.addWidget(self.Edit_radioButton3,               3,  1)
+        self.gridLayout.addWidget(self.Release_radioButton3,            3,  2)
+        self.gridLayout.addWidget(self.Override_radioButton3,           3,  3)
         
-        self.gridLayout.addWidget(self.Edit_radioButton4,       4,      1)
-        self.gridLayout.addWidget(self.Release_radioButton4,    4,      2)
-        self.gridLayout.addWidget(self.Override_radioButton4,   4,      3)
+        self.gridLayout.addWidget(self.Edit_radioButton4,               4,  1)
+        self.gridLayout.addWidget(self.Release_radioButton4,            4,  2)
+        self.gridLayout.addWidget(self.Override_radioButton4,           4,  3)
         
-        self.gridLayout.addWidget(self.Edit_radioButton5,       5,      1)
-        self.gridLayout.addWidget(self.Release_radioButton5,    5,      2)
-        self.gridLayout.addWidget(self.Override_radioButton5,   5,      3)
+        self.gridLayout.addWidget(self.Edit_radioButton5,               5,  1)
+        self.gridLayout.addWidget(self.Release_radioButton5,            5,  2)
+        self.gridLayout.addWidget(self.Override_radioButton5,           5,  3)
         
-        self.gridLayout.addWidget(self.Edit_radioButton6,       6,      1)
-        self.gridLayout.addWidget(self.Release_radioButton6,    6,      2)
-        self.gridLayout.addWidget(self.Override_radioButton6,   6,      3)
+        self.gridLayout.addWidget(self.Edit_radioButton6,               6,  1)
+        self.gridLayout.addWidget(self.Release_radioButton6,            6,  2)
+        self.gridLayout.addWidget(self.Override_radioButton6,           6,  3)
         
         self.vlayout = QVBoxLayout()
         self.vlayout.addLayout(self.vlayout1)
@@ -2853,114 +2855,58 @@ class ExportOption(QDialog):
         self.CRD_PLUS_FILE_CHECKBOX.setChecked(self.ALL_FILE_CHECK)
     
     def Edit_radioButton_Clicked(self):
-        status = self.Edit_radioButton.isChecked()
-        if status == True:
-            self.Edit_radioButton1_status       = True
-            self.Release_radioButton1_status    = False
-            self.Override_radioButton1_status   = False
-            
-            self.Edit_radioButton2_status       = True
-            self.Release_radioButton2_status    = False
-            self.Override_radioButton2_status   = False
-            
-            self.Edit_radioButton3_status       = True
-            self.Release_radioButton3_status    = False
-            self.Override_radioButton3_status   = False
-            
-            self.Edit_radioButton4_status       = True
-            self.Release_radioButton4_status    = False
-            self.Override_radioButton4_status   = False
-            
-            self.Edit_radioButton5_status       = True
-            self.Release_radioButton5_status    = False
-            self.Override_radioButton5_status   = False
-            
-            self.Edit_radioButton6_status       = True
-            self.Release_radioButton6_status    = False
-            self.Override_radioButton6_status   = False
-    
+        if self.Edit_radioButton.isChecked() == True:
+            self.Edit_radioButton1.setChecked(True)
+            self.Edit_radioButton2.setChecked(True)
+            self.Edit_radioButton3.setChecked(True)
+            self.Edit_radioButton4.setChecked(True)
+            self.Edit_radioButton5.setChecked(True)
+            self.Edit_radioButton6.setChecked(True)
+          
     def Release_radioButton_Clicked(self):
-        status = self.Release_radioButton.isChecked()
-        if status == True:
-            self.Edit_radioButton1_status       = False
-            self.Release_radioButton1_status    = True
-            self.Override_radioButton1_status   = False
-            
-            self.Edit_radioButton2_status       = False
-            self.Release_radioButton2_status    = True
-            self.Override_radioButton2_status   = False
-            
-            self.Edit_radioButton3_status       = False
-            self.Release_radioButton3_status    = True
-            self.Override_radioButton3_status   = False
-            
-            self.Edit_radioButton4_status       = False
-            self.Release_radioButton4_status    = True
-            self.Override_radioButton4_status   = False
-            
-            self.Edit_radioButton5_status       = False
-            self.Release_radioButton5_status    = True
-            self.Override_radioButton5_status   = False
-            
-            self.Edit_radioButton6_status       = False
-            self.Release_radioButton6_status    = True
-            self.Override_radioButton6_status   = False
-    
+        if self.Release_radioButton.isChecked() == True:
+            self.Release_radioButton1.setChecked(True)
+            self.Release_radioButton2.setChecked(True)  
+            self.Release_radioButton3.setChecked(True)     
+            self.Release_radioButton4.setChecked(True)          
+            self.Release_radioButton5.setChecked(True)
+            self.Release_radioButton6.setChecked(True)
+
     def Override_radioButton_Clicked(self):
-        status = self.Override_radioButton.isChecked()
-        if status == True:
-            self.Edit_radioButton1_status       = False
-            self.Release_radioButton1_status    = False
-            self.Override_radioButton1_status   = True
-            
-            self.Edit_radioButton2_status       = False
-            self.Release_radioButton2_status    = False
-            self.Override_radioButton2_status   = True
-            
-            self.Edit_radioButton3_status       = False
-            self.Release_radioButton3_status    = False
-            self.Override_radioButton3_status   = True
-            
-            self.Edit_radioButton4_status       = False
-            self.Release_radioButton4_status    = False
-            self.Override_radioButton4_status   = True
-            
-            self.Edit_radioButton5_status       = False
-            self.Release_radioButton5_status    = False
-            self.Override_radioButton5_status   = True
-            
-            self.Edit_radioButton6_status       = False
-            self.Release_radioButton6_status    = False
-            self.Override_radioButton6_status   = True                  
+        if self.Override_radioButton.isChecked() == True:
+            self.Override_radioButton1.setChecked(True)
+            self.Override_radioButton2.setChecked(True)
+            self.Override_radioButton3.setChecked(True)
+            self.Override_radioButton4.setChecked(True)
+            self.Override_radioButton5.setChecked(True)
+            self.Override_radioButton6.setChecked(True)               
     
     def Accept(self):
+        self.Edit_radioButton1_status       = self.Edit_radioButton1.isChecked()
+        self.Release_radioButton1_status    = self.Release_radioButton1.isChecked()
+        self.Override_radioButton1_status   = self.Override_radioButton1.isChecked()
 
-        self.Edit_radioButton1.setChecked(self.Edit_radioButton1_status)
-        self.Release_radioButton1.setChecked(self.Release_radioButton1_status)
-        self.Override_radioButton1.setChecked(self.Override_radioButton1_status)
+        self.Edit_radioButton2_status       = self.Edit_radioButton2.isChecked()
+        self.Release_radioButton2_status    = self.Release_radioButton2.isChecked()
+        self.Override_radioButton2_status   = self.Override_radioButton2.isChecked()
 
-        self.Edit_radioButton2.setChecked(self.Edit_radioButton2_status)
-        self.Release_radioButton2.setChecked(self.Release_radioButton2_status)
-        self.Override_radioButton2.setChecked(self.Override_radioButton2_status)
+        self.Edit_radioButton3_status       = self.Edit_radioButton3.isChecked()
+        self.Release_radioButton3_status    = self.Release_radioButton3.isChecked()
+        self.Override_radioButton3_status   = self.Override_radioButton3.isChecked()
 
-        self.Edit_radioButton3.setChecked(self.Edit_radioButton3_status)
-        self.Release_radioButton3.setChecked(self.Release_radioButton3_status)
-        self.Override_radioButton3.setChecked(self.Override_radioButton3_status)
+        self.Edit_radioButton4_status       = self.Edit_radioButton4.isChecked()
+        self.Release_radioButton4_status    = self.Release_radioButton4.isChecked()
+        self.Override_radioButton4_status   = self.Override_radioButton4.isChecked()
 
-        self.Edit_radioButton4.setChecked(self.Edit_radioButton4_status)
-        self.Release_radioButton4.setChecked(self.Release_radioButton4_status)
-        self.Override_radioButton4.setChecked(self.Override_radioButton4_status)
+        self.Edit_radioButton5_status       = self.Edit_radioButton5.isChecked()
+        self.Release_radioButton5_status    = self.Release_radioButton5.isChecked()
+        self.Override_radioButton5_status   = self.Override_radioButton5.isChecked()
 
-        self.Edit_radioButton5.setChecked(self.Edit_radioButton5_status)
-        self.Release_radioButton5.setChecked(self.Release_radioButton5_status)
-        self.Override_radioButton5.setChecked(self.Override_radioButton5_status)
-
-        self.Edit_radioButton6.setChecked(self.Edit_radioButton6_status)
-        self.Release_radioButton6.setChecked(self.Release_radioButton6_status)
-        self.Override_radioButton6.setChecked(self.Override_radioButton6_status)
+        self.Edit_radioButton6_status       = self.Edit_radioButton6.isChecked()
+        self.Release_radioButton6_status    = self.Release_radioButton6.isChecked()
+        self.Override_radioButton6_status   = self.Override_radioButton6.isChecked()
         
         self.close()
-        
         return
     
     def Reject(self):
@@ -2986,24 +2932,24 @@ class ExportOption(QDialog):
                self.CRD_PLUS_FILE_CHECKBOX.isChecked() \
     
     def Return_status(self):
-        return self.Edit_radioButton1.isChecked(), \
-                self.Release_radioButton1.isChecked(), \
-                self.Override_radioButton1.isChecked(), \
-                self.Edit_radioButton2.isChecked(), \
-                self.Release_radioButton2.isChecked(), \
-                self.Override_radioButton2.isChecked(), \
-                self.Edit_radioButton3.isChecked(), \
-                self.Release_radioButton3.isChecked(), \
-                self.Override_radioButton3.isChecked(), \
-                self.Edit_radioButton4.isChecked(), \
-                self.Release_radioButton4.isChecked(), \
-                self.Override_radioButton4.isChecked(), \
-                self.Edit_radioButton5.isChecked(), \
-                self.Release_radioButton5.isChecked(), \
-                self.Override_radioButton5.isChecked(), \
-                self.Edit_radioButton6.isChecked(), \
-                self.Release_radioButton6.isChecked(), \
-                self.Override_radioButton6.isChecked(), \
+        return self.Edit_radioButton1_status, \
+                self.Release_radioButton1_status, \
+                self.Override_radioButton1_status, \
+                self.Edit_radioButton2_status, \
+                self.Release_radioButton2_status, \
+                self.Override_radioButton2_status, \
+                self.Edit_radioButton3_status, \
+                self.Release_radioButton3_status, \
+                self.Override_radioButton3_status, \
+                self.Edit_radioButton4_status, \
+                self.Release_radioButton4_status, \
+                self.Override_radioButton4_status, \
+                self.Edit_radioButton5_status, \
+                self.Release_radioButton5_status, \
+                self.Override_radioButton5_status, \
+                self.Edit_radioButton6_status, \
+                self.Release_radioButton6_status, \
+                self.Override_radioButton6_status, \
     
     # class ExportOption
     def mouseMoveEvent(self, event):
@@ -3013,7 +2959,7 @@ class ExportOption(QDialog):
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPosition = event.globalPos()
         except:
-            return
+            pass
 
     # class ExportOption
     def mousePressEvent(self, event):
@@ -3021,4 +2967,4 @@ class ExportOption(QDialog):
         try:
             self.oldPosition = event.globalPos()
         except:
-            return
+            pass
