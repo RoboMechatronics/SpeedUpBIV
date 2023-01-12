@@ -351,15 +351,6 @@ IMPORT_XY_BUTTON_STYLE_SHEET = """
         background: rgba(255,150,0,0.3);
     }
     """
-FOLDER_TREE_STYLE_SHEET = """
-    QHeaderView{
-        color: black;
-    }
-    QTreeWidget{
-        color: white;
-    }
-    """
-
 RADIO_BUTTON_STYLE_SHEET = """
     QRadioButton {
         color: rgb(255,255,255); 
@@ -631,14 +622,7 @@ CLEAR_EXPORT_OPTION_BUTTON_STYLE_SHEET="""
                                             QPushButton:pressed {
                                                 background-color: rgba(255,255,255,0.5);
                                                 border: 0px;
-                                            }"""       
-Tab2_foldertree_stylesheet = """
-                                QTreeView {
-                                    font: 15px 3ds;
-                                    background-color: rgba(0,0,0,0);
-                                    color: white;
-                                }"""
-                                                                                                
+                                            }"""                                                                                                       
 
 Notification_stylesheet = """
                             QDialog{
@@ -691,6 +675,34 @@ APPLY_ALL_REVISION_OPTION_STYLE_SHEET="""
                                         background-color: rgba(255,255,255,0.5);
                                         border: 0px;
                                     }"""   
+
+FOLDER_TREE_TAB_STYLE_SHEET = """
+                                QTabWidget::pane {
+                                    background: rgba(0,0,0,0.1);
+                                    color: rgb(255,255,255);
+                                    border:0px;
+                                    border-radius: 10px;
+                                }
+                                QTabBar::tab {
+                                    background: rgba(100, 255, 100, 0);
+                                    border-radius: 10px;
+                                    color: rgb(255,255,255);
+                                    spacing: 5px;           
+                                    padding: 5px 10px;
+                                }
+
+                                QTabBar::tab::selected {
+                                    background: rgba(255, 150, 0, 1);
+                                    color: rgb(255,255,255);
+                                    border-radius: 10px;
+                                    spacing: 5px;           
+                                    padding: 5px 10px;
+                                }
+                                """
+FOLDER_TREE_GROUPBOX = """QGroupBox{
+                                    border: 0px;
+                                    background-color: rgba(0, 0, 0, 0);
+                        }"""
 # End of Styles
 
 # Paths
@@ -699,49 +711,44 @@ XY_LIST_SV_FORMAT_HEADER_LIST = ['SITE#/DUT#', 'PAD#', 'X Coordinate (um)', 'Y C
 
 # EXPORTED FILES FORMAT
 PROBE_HEAD_XY_SHEETS_NAME = ['History of Revision', 'XY Coordinates']
-# PROBE_HEAD_XY_TEMPLATE_FILENAME = 'YYY-XXXXXX-xx-Probe Head XY Coordinates For Approval Rev00.xlsx'
-# PROBE_HEAD_XY_TEMPLATE_FULLPATH = 'templates/' + PROBE_HEAD_XY_TEMPLATE_FILENAME
-# PROBE_HEAD_XY_FULLPATH = 'result/PART-NUMBER-xx-Probe Head XY Coordinates For Approval Rev00.xlsx'
 
 ARRAY_FULL_SITE_SHEET_NAME = ['Revision', 'XY list']
-# ARRAY_FULL_SITE_TEMPLATE_FILENAME = 'YYY-XXXXXX_Array full sites for reference_Rev00.xlsx'
-# ARRAY_FULL_SITE_TEMPLATE_FULLPATH = 'templates/' + ARRAY_FULL_SITE_TEMPLATE_FILENAME
-# ARRAY_FULL_SITE_FULLPATH = 'result/PART-NUMBER-xx_Array full sites for reference_Rev00.xlsx'
 
+# Revision status
 XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS = {
-    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[0]: True, # Edit
     REVISION_STATUS[1]: False, # Release
-    REVISION_STATUS[2]: True, # Override
+    REVISION_STATUS[2]: False, # Override
 }
 
 ARRAY_FULL_SITE_EXPORT_STATUS = {
-    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[0]: True, # Edit
     REVISION_STATUS[1]: False, # Release
-    REVISION_STATUS[2]: True, # Override
+    REVISION_STATUS[2]: False, # Override
 }
 
 PROBE_HEAD_XY_FILE_EXPORT_STATUS = {
-    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[0]: True, # Edit
     REVISION_STATUS[1]: False, # Release
-    REVISION_STATUS[2]: True, # Override
+    REVISION_STATUS[2]: False, # Override
 }
 
 PCB_PAD_LOCATION_EXPORT_STATUS = {
-    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[0]: True, # Edit
     REVISION_STATUS[1]: False, # Release
-    REVISION_STATUS[2]: True, # Override
+    REVISION_STATUS[2]: False, # Override
 }
 
 IUA_PLUS_EXPORT_STATUS = {
-    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[0]: True, # Edit
     REVISION_STATUS[1]: False, # Release
-    REVISION_STATUS[2]: True, # Override
+    REVISION_STATUS[2]: False, # Override
 }
 
 CRD_PLUS_EXPORT_STATUS = {
-    REVISION_STATUS[0]: False, # Edit
+    REVISION_STATUS[0]: True, # Edit
     REVISION_STATUS[1]: False, # Release
-    REVISION_STATUS[2]: True, # Override
+    REVISION_STATUS[2]: False, # Override
 }
 
 # NC (not connect) Definition
@@ -749,11 +756,11 @@ NC_OPTION = ['No Probe, No Drill Hole', "No Probe, Drill Hole"]
 #--------------------------------------------------------#
 
 # Read paths.txt file to get path
-try:
-    with open('paths.txt', encoding='utf8') as f:
-        paths = f.readlines()
-except:
-    pass
+# try:
+#     with open('paths.txt', encoding='utf8') as f:
+#         paths = f.readlines()
+# except:
+#     pass
 # End read paths.txt file to get path
 
 # END #

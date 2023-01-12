@@ -1034,13 +1034,92 @@ class Tab_Widget(QWidget):
 
         # Set Tab 1 layout
         self.tab1.setLayout(table_and_xy_chart)
+
+        self.tab3.setLayout(self.Folder_Tree())
         
     # class Tab_Widget(QWidget): 
     def Return(self):
         return self.TABs
 
-    def Folder_Tree(path, TreeWidget):
+    def Folder_Tree(self):
+        self.path = "E:/pnnhien/python_project/my_app_venv_02/app"
+
+        tab1 = QWidget()
+        tab2 = QWidget()
+        tab1.setFont(QFont("3ds", 8))
+        tab2.setFont(QFont("3ds", 8))
+
+        folder_tabs = QTabWidget()
+        folder_tabs.setStyleSheet(FOLDER_TREE_TAB_STYLE_SHEET)
+
+        folder_tabs.addTab(tab1, "Design Folder")
+        folder_tabs.addTab(tab2, "MFG files")
+        
+        self.path_textbox = QLineEdit()
+        self.path_textbox.setText(self.path)
+        self.path_textbox.textChanged.connect(self.textchanged)
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(folder_tabs)
+
+        path_label = QLabel("Device path:")
+        
+        path_hboxlayout  = QHBoxLayout()
+        path_hboxlayout.addWidget(path_label)
+        path_hboxlayout.addWidget(self.path_textbox)
+
+        self.tree = self.TreeView(self.path)
+
+        self.tab1_layout = QVBoxLayout()
+        self.tab1_layout.addLayout(path_hboxlayout)
+        self.tab1_layout.addWidget(self.tree)
+        tab1.setLayout(self.tab1_layout)
+
+        path_label.setStyleSheet("""QLabel{
+                                color: rgb(255,255,255);
+                                font: 15px 3ds;
+                                background-color: rgba(255,255,255,0);
+                            }""")
+
+        self.path_textbox.setStyleSheet("""QLineEdit{
+                                        color: rgb(255,255,255);
+                                        font: 15px 3ds;
+                                        background-color: rgba(255,255,255,0.2);
+                                        border-radius: 5px;
+                                    }""")
+
+        return main_layout
+    
+    def textchanged(self):
+        self.path = self.path_textbox.text()
+        if self.path != "":
+            if os.path.exists(self.path):
+                self.tab1_layout.removeWidget(self.tree)
+                del self.tree
+                self.tree = self.TreeView(self.path)
+                self.tab1_layout.addWidget(self.tree)
         return
+    
+    def TreeView(self, path):
+        model = QFileSystemModel()
+        model.setRootPath(path)
+
+        tree = QTreeView()
+        tree.setModel(model)
+        tree.setRootIndex(model.index(path))
+        tree.setColumnWidth(0,250)
+
+        tree.setSortingEnabled(True)
+   
+        # Stylesheet
+        tree.setStyleSheet("""QTreeView {
+                                color: rgb(255,255,255);
+                                background-color: rgba(255,255,255,0);
+                                font: 15px 3ds;
+                            }""")
+
+        return tree
+
 # End of Tab class #
 
 class Chart(FigureCanvasQTAgg):
