@@ -699,10 +699,18 @@ FOLDER_TREE_TAB_STYLE_SHEET = """
                                     padding: 5px 10px;
                                 }
                                 """
-FOLDER_TREE_GROUPBOX = """QGroupBox{
-                                    border: 0px;
-                                    background-color: rgba(0, 0, 0, 0);
-                        }"""
+
+FOLDER_TREE_TAB_LABEL_STYLESHEET = """QLabel{
+                                color: rgb(255,255,255);
+                                font: 15px 3ds;
+                                background-color: rgba(255,255,255,0);
+                            }"""
+FOLDER_TREE_TAB_TEXTBOX_STYLESHEET = """QLineEdit{
+                                        color: rgb(255,255,255);
+                                        font: 15px 3ds;
+                                        background-color: rgba(255,255,255,0.2);
+                                        border-radius: 5px;
+                                    }"""
 # End of Styles
 
 # Paths

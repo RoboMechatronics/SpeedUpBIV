@@ -18,6 +18,9 @@ class MainWindow(QMainWindow):
         super().__init__()      
 
         self.new_project = new_project
+        self.path = ["E:/pnnhien/python_project/my_app_venv_02/app",
+                     "E:/pnnhien/python_project/my_app_venv_02/app",
+                     "E:/pnnhien/python_project/my_app_venv_02/app"]
 
         # Variables to store XY coordinates list
         self.X, self.Y = [], []
@@ -75,7 +78,7 @@ class MainWindow(QMainWindow):
         self.table                  = TableWindow()
         chart                       = Chart(width=5, height=4, dpi=100)
         self.CHART, self.toolbar    = SCATTER_CHART(self.X, self.Y, chart, self.NC_LIST, self.NC_DENOTE)
-        self.Tab_content            = Tab_Widget(self, self.table, self.CHART, self.toolbar)
+        self.Tab_content            = Tab_Widget(self, self.table, self.CHART, self.toolbar, self.path)
 
         # Create table in tab2 according to XY list SV format
         self.table_tab2     = TableWindow(NumRow=0, NumCol=0)
@@ -972,13 +975,17 @@ class MainWindow(QMainWindow):
 # End of Main Window class #
 
 class Tab_Widget(QWidget): 
-    def __init__(self, parent, table, CHART, toolbar):
+    def __init__(self, parent, table, CHART, toolbar, paths):
         super(QWidget, self).__init__(parent)
         
         self.X, self.Y = [], []
         self.table = table
         self.CHART = CHART
         self.toolbar = toolbar
+        
+        self.path = paths[0]
+        self.path_left = paths[1]
+        self.path_right = paths[2]
         
         # Initialize tabs
         self.TABs = QTabWidget()
@@ -1034,7 +1041,7 @@ class Tab_Widget(QWidget):
 
         # Set Tab 1 layout
         self.tab1.setLayout(table_and_xy_chart)
-
+        
         self.tab3.setLayout(self.Folder_Tree())
         
     # class Tab_Widget(QWidget): 
@@ -1042,8 +1049,7 @@ class Tab_Widget(QWidget):
         return self.TABs
 
     def Folder_Tree(self):
-        self.path = "E:/pnnhien/python_project/my_app_venv_02/app"
-
+        
         tab1 = QWidget()
         tab2 = QWidget()
         tab1.setFont(QFont("3ds", 8))
@@ -1057,62 +1063,143 @@ class Tab_Widget(QWidget):
         
         self.path_textbox = QLineEdit()
         self.path_textbox.setText(self.path)
-        self.path_textbox.textChanged.connect(self.textchanged)
+        # self.path_textbox.textChanged.connect(self.path_tab1_textchanged)
+        
+        self.path_tab2_left_textbox = QLineEdit()
+        self.path_tab2_left_textbox.setText(self.path_left)
+        # self.path_tab2_left_textbox.textChanged.connect(self.path_tab2_left_textchanged)
+        
+        self.path_tab2_right_textbox = QLineEdit()
+        self.path_tab2_right_textbox.setText(self.path_right)
+        # self.path_tab2_right_textbox.textChanged.connect(self.path_tab2_right_textchanged)
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(folder_tabs)
 
         path_label = QLabel("Device path:")
+        path_label_tab2_left = QLabel("SOLIDWORKS PDM path:")
+        path_label_tab2_right = QLabel("Release files path:")
         
         path_hboxlayout  = QHBoxLayout()
         path_hboxlayout.addWidget(path_label)
         path_hboxlayout.addWidget(self.path_textbox)
 
-        self.tree = self.TreeView(self.path)
+        self.tree1 = self.TreeWidget()
+        self.tree2 = self.TreeWidget()
+        self.tree3 = self.TreeWidget()
 
         self.tab1_layout = QVBoxLayout()
         self.tab1_layout.addLayout(path_hboxlayout)
-        self.tab1_layout.addWidget(self.tree)
+        self.tab1_layout.addWidget(self.tree1)
         tab1.setLayout(self.tab1_layout)
+        
+        self.tab2_layout = QVBoxLayout()
+        tab2_left_frame = QFrame()
+        tab2_right_frame = QFrame()
+        tab2_left_frame.setFrameShape(QFrame.StyledPanel)
+        tab2_right_frame.setFrameShape(QFrame.StyledPanel)
+        
+        self.tab2_left_sublayout    = QHBoxLayout()
+        self.tab2_right_sublayout   =QHBoxLayout()
+        self.tab2_left_sublayout.addWidget(path_label_tab2_left)
+        self.tab2_left_sublayout.addWidget(self.path_tab2_left_textbox)
+        self.tab2_right_sublayout.addWidget(path_label_tab2_right)
+        self.tab2_right_sublayout.addWidget(self.path_tab2_right_textbox)
+        
+        self.tab2_left_layout = QVBoxLayout()
+        self.tab2_right_layout = QVBoxLayout()
+        
+        self.tab2_left_layout.addLayout(self.tab2_left_sublayout)
+        self.tab2_left_layout.addWidget(self.tree2)
+        
+        self.tab2_right_layout.addLayout(self.tab2_right_sublayout)
+        self.tab2_right_layout.addWidget(self.tree3)
+        
+        tab2_left_frame.setLayout(self.tab2_left_layout)
+        tab2_right_frame.setLayout(self.tab2_right_layout)
+        
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(tab2_left_frame)
+        splitter.addWidget(tab2_right_frame)
+        self.tab2_layout.addWidget(splitter)
+        tab2.setLayout(self.tab2_layout)
+        
+        # Stylesheet
+        path_label.setStyleSheet(FOLDER_TREE_TAB_LABEL_STYLESHEET)
+        path_label_tab2_left.setStyleSheet(FOLDER_TREE_TAB_LABEL_STYLESHEET)
+        path_label_tab2_right.setStyleSheet(FOLDER_TREE_TAB_LABEL_STYLESHEET)
 
-        path_label.setStyleSheet("""QLabel{
-                                color: rgb(255,255,255);
-                                font: 15px 3ds;
-                                background-color: rgba(255,255,255,0);
-                            }""")
-
-        self.path_textbox.setStyleSheet("""QLineEdit{
-                                        color: rgb(255,255,255);
-                                        font: 15px 3ds;
-                                        background-color: rgba(255,255,255,0.2);
-                                        border-radius: 5px;
-                                    }""")
-
+        self.path_textbox.setStyleSheet(FOLDER_TREE_TAB_TEXTBOX_STYLESHEET)
+        self.path_tab2_left_textbox.setStyleSheet(FOLDER_TREE_TAB_TEXTBOX_STYLESHEET)
+        self.path_tab2_right_textbox.setStyleSheet(FOLDER_TREE_TAB_TEXTBOX_STYLESHEET)
+        
         return main_layout
     
-    def textchanged(self):
-        self.path = self.path_textbox.text()
-        if self.path != "":
-            if os.path.exists(self.path):
-                self.tab1_layout.removeWidget(self.tree)
-                del self.tree
-                self.tree = self.TreeView(self.path)
-                self.tab1_layout.addWidget(self.tree)
-        return
+    # def path_tab1_textchanged(self):
+    #     self.path = self.path_textbox.text()
+    #     if self.path != "":
+    #         if os.path.exists(self.path):
+    #             self.tab1_layout.removeWidget(self.tree1)
+    #             del self.tree1
+    #             self.tree1 = self.TreeView(self.path)
+    #             self.tab1_layout.addWidget(self.tree1)
+    #     return
     
-    def TreeView(self, path):
-        model = QFileSystemModel()
-        model.setRootPath(path)
+    # def path_tab2_left_textchanged(self):
+    #     self.path_left = self.path_tab2_left_textbox.text()
+    #     if self.path_left != "":
+    #         if os.path.exists(self.path_left):
+    #             self.tab2_left_layout.removeWidget(self.tree2)
+    #             del self.tree2
+    #             self.tree2 = self.TreeView(self.path_left)
+    #             self.tab2_left_layout.addWidget(self.tree2)
+    #     return
+    
+    # def path_tab2_right_textchanged(self):
+    #     self.path_right = self.path_tab2_right_textbox.text()
+    #     if self.path_right != "":
+    #         if os.path.exists(self.path_right):
+    #             self.tab2_right_layout.removeWidget(self.tree3)
+    #             del self.tree3
+    #             self.tree3 = self.TreeView(self.path_right)
+    #             self.tab2_right_layout.addWidget(self.tree3)
+    #     return
+    
+    def TreeWidget(self):
+        # model = QFileSystemModel()
+        # model.setRootPath(path)
 
-        tree = QTreeView()
-        tree.setModel(model)
-        tree.setRootIndex(model.index(path))
-        tree.setColumnWidth(0,250)
+        tree = QTreeWidget()
+        # tree.setModel(model)
+        tree.setColumnCount(2)
+        tree.setColumnWidth(0, 150)
+        tree.setColumnWidth(1, 150)
+        tree.setHeaderLabels(['Part Number', 'Files', 'Status'])
 
-        tree.setSortingEnabled(True)
-   
-        # Stylesheet
-        tree.setStyleSheet("""QTreeView {
+        part_numbers = ['401-XXXXXX-01','PCX-000000-xx','LGP-000000-01']
+        employees = {
+            '401-XXXXXX-01': ['401-XXXXXX-01.sldprt','401-XXXXXX-01.slddrw'],
+            'PCX-000000-xx': ['PCX-000000-xx.sldasm','PCX-000000-xx.slddrw'],
+            'LGP-000000-01': ['LGP-000000-01.sldprt','LGP-000000-01.slddrw'],
+        }
+        status = {
+            '401-XXXXXX-01': ['Pass', 'Pass'],
+            'PCX-000000-xx': ['Pass', 'Pass'],
+            'LGP-000000-01': ['Pass', 'Pass'],
+        }
+        
+        # addition data to the tree
+        for part_number in part_numbers:
+            part_item = QTreeWidgetItem(tree)
+            part_item.setText(0, part_number)
+            # set the child
+            for employee in employees[part_number]:
+                employee_item   = QTreeWidgetItem(tree)
+                employee_item.setText(1, employee)
+
+                part_item.addChild(employee_item)
+
+        tree.setStyleSheet("""QTreeWidget {
                                 color: rgb(255,255,255);
                                 background-color: rgba(255,255,255,0);
                                 font: 15px 3ds;
@@ -1313,10 +1400,12 @@ class SheetsNameDialog(QDialog):
 
         # Label
         message = QLabel("Please choose sheet to import and press OK:")
+        
         message.setStyleSheet("QLabel{"
                                 "color: rgb(255,255,255);" 
                                 "background-color: rgba(0,0,0,0);"
                                 "border: 0px;}")
+        
         message.setFont(QFont("3ds", 12))
         
         self.layout.addWidget(message)
