@@ -24,6 +24,7 @@ class MainWindow(QMainWindow):
 
         # Variables to store XY coordinates list
         self.X, self.Y = [], []
+        
         # Variables to store XY coordinates list after pattern
         self.X_list_pattern, self.Y_list_pattern = [], []
         
@@ -2543,16 +2544,17 @@ def EXPORT_FILES(table_TableWidget , option):
 class SplashScreen(QDialog):
     def __init__(self, app):
         super().__init__()
-
+        self.window_width = 700
+        self.window_height = 400
         # Set up UI
         self.setWindowTitle('Hello')
-        self.setFixedSize(900, 480)
+        self.setFixedSize(self.window_width, self.window_height)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowMinimizeButtonHint)
         self.setWindowIcon(QIcon('icon/card.png'))
         self.setStyleSheet(SplashScreen_stylesheet)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.screen = app.primaryScreen()
-        self.setGeometry(np.int16((self.screen.size().width()-900)/2), np.int16((self.screen.size().height()-500)/2),0,0)
+        self.setGeometry(np.int16((self.screen.size().width()-self.window_width)/2), np.int16((self.screen.size().height()-self.window_height)/2),0,0)
         
         # initial variables
         self.run = False
@@ -2564,11 +2566,13 @@ class SplashScreen(QDialog):
 
     # class SplashScreen
     def initUI(self):
+        move_X = 40
+        move_Y = 60
         background_img = QLabel(self)
-        background_img.resize(800, 400)
-        background_img.move(50, 70)
+        background_img.resize(self.window_width-2*move_X, self.window_height - move_Y - 20)
+        background_img.move(move_X, move_Y)
         background_img.setStyleSheet("border-image: url('icon/splash_background.jpg');"
-                                    "border-radius: 20px;")
+                                        "border-radius: 15px;")
 
         labelTitle = QLabel("Hi, " + os.getlogin())
         labelTitle.setStyleSheet(label_stylesheet)
@@ -2587,6 +2591,7 @@ class SplashScreen(QDialog):
                                             "font: 20px 3ds;")
 
         nidec_logo = QPixmap('icon/nidec_logo.png')
+        nidec_logo = nidec_logo.scaled(200,100)
         nidec_logo_label = QLabel(self)
         nidec_logo_label.setPixmap(nidec_logo)
 
@@ -2687,9 +2692,6 @@ class SplashScreen(QDialog):
     # class SplashScreen
     def Run(self):
         return self.run, self.new
-
-    def Return(self):
-        return
 
     # class SplashScreen
     # Set up move window by clicked mouse

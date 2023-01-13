@@ -3,20 +3,18 @@ from mainui import *
 app = QApplication(sys.argv)
 app.setStyleSheet(MainStyleSheet)
 
-def main():
-    splash = SplashScreen(app)
+splash = SplashScreen(app)
+status, new_project = splash.Run()
 
-    status, new_project = splash.Run()
-
-    if (status == False):
-        exit()
-    else:
-        splash.close()
-        del splash
-    
-    window = MainWindow(app, new_project) 
-    window.show()    
-    sys.exit(app.exec_())
+if (status == False): 
+    exit()
+else:
+    splash.close()
+    del splash
 
 if __name__ == '__main__':
-    main()
+    window = MainWindow(app, new_project) 
+    window.show()
+    sys.exit(app.exec_())
+    del window
+    del app

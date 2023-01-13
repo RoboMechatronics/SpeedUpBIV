@@ -275,7 +275,7 @@ def GET_REVISION_STRING(path_file, string_to_find):
 # Start of REVISION_CHANGE_TYPE function:
 # Input:
 # - old_revision: old revision
-# - type: Edit, Release or Override
+# - type: Edit, Release, Override or New
 def REVISION_CHANGE_TYPE(old_revision, type = "Edit"): 
     # Check old_revision string if it is empty 
     if old_revision == "":
@@ -290,6 +290,7 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"):
     numeric_revision = "" # from 00 to 99, example: 01, 02, 03. Note: 00 is used to initial
     alpha_revision = "" # from A to Z, AA to ZZ, example: A, B, AA, AB
     mix_revision = "" # include A and 00 or AA and 00, example: A01, AB01
+    new_revision = ""
 
     # Check numberic or alpha or mix type:
     if old_revision.isdigit() == True: # revision value is like "01", "02", or "03"
@@ -327,18 +328,21 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"):
                         break
                     else:
                         s[i] = "0"
-                        
+            # end if numeric_revision != "" and alpha_revision == "" and mix_revision == "" #
+
             # Case 2: alpha, change from A to A01, keyword: alpha2alphadigit
             if numeric_revision == "" and alpha_revision != "" and mix_revision == "":
                 s.reverse()
                 s.append("01")
                 s.reverse()
-                    
+            # end if numeric_revision == "" and alpha_revision != "" and mix_revision == ""
+           
             # Case 3: alpha + digit,  change from A01 to A02, or AA01 to AA02, keyword: alphadigit2alphadigit
             if numeric_revision == "" and alpha_revision == "" and mix_revision != "":
                 if len(mix_revision) < 3:
                     return ""
-                
+                # end if len(mix_revision) < 3
+
                 if len(mix_revision) == 3:
                     alpha = mix_revision[0]
                     number = [i for i in mix_revision[1:]]
@@ -356,7 +360,8 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"):
                     
                     s = []
                     s = [i for i in number_]
-                    
+                # end if len(mix_revision) == 3
+
                 if len(mix_revision) == 4:
                     alpha = [i for i in mix_revision[:2]]
                     number = [i for i in mix_revision[2:]]
@@ -379,14 +384,18 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"):
                     s = []
                     s = [i for i in number_]
                     s.reverse()
-            
+                # end if len(mix_revision) == 4
+
             s.reverse()
             new_revision = ""
             for i in s:
                 new_revision = new_revision + i
         else:
             return ""
-    
+        
+        # end if s:
+    # end if type == "Edit"
+
     if type == "Release":
         if s:
             s.reverse()
@@ -447,54 +456,65 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"):
                 new_revision = new_revision + i
         else:
             return ""
-    
+        # end if s
+    # if type == "Release"
     return new_revision # like: 02, A, B, A02
 
 def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(card_part_number="", X=[], Y=[], status="", unit="mm", sheet_name = 'Sheet1'):
-    """
     # Input Parameters:
     #   1.card_part_number as PCX-000000, MSP-000000
     #   2.X coordinates from tab 1 table, like X = [0,1,2,3,4,5,...,n]
     #   3.Y coordinates from tab 1 table, like Y = [0,1,2,3,4,5,...,n]
     #   4.sheet_name is "Sheet1" as default
-    #   5.status: Release, Edit or Override
+    #   5.status: Release, Edit, Override, New
     # Note Unit is mm as default, convert to mm if unit is not 'mm'
     
     # Get file name, file extension from path.txt file
-    file_name, file_extension = GET_FILE_PATH('paths.txt', 'XY_FORMAT_FOR_IUA_PLUS_FILENAME')
     # example: file_name = "YYY-XXXXXX_XY input format for IUA_plus_Rev00" and file_extension = "xlsx"
-    
+    file_name, file_extension = GET_FILE_PATH('paths.txt', 'XY_FORMAT_FOR_IUA_PLUS_FILENAME')
     # Get folder template path
     folder_template_location    = GET_FOLDER_PATH('paths.txt', 'folder_template_path')
-    
     # Get revision in file name:
     revision_string_format      = GET_REVISION_STRING('paths.txt', "REVISION_FORMAT")
-    
     revision_pos_in_file_name   = file_name.index(revision_string_format)
     revision_string             = file_name[revision_pos_in_file_name:]
-    
+    # Get old revision
     old_revision = revision_string[len(revision_string_format):]
-    new_revision = REVISION_CHANGE_TYPE(old_revision, status) # status  = ["Release", "Edit", "Override"]
+    # Get new revision base on status value
+    new_revision = REVISION_CHANGE_TYPE(old_revision, status) # status  = ["Release", "Edit", "Override", "New"]
     
-    new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
-    new_file_name = file_name.replace(old_revision, new_revision)
-    new_location = GET_FOLDER_PATH('paths.txt', 'design_folder_path') + "/" + str(card_part_number) + '-xx'
-    
-    scr = folder_template_location + "/" + file_name + "." + file_extension
-    dst = new_location + "/" + new_file_name + "." + file_extension
-    
-    try:
-        shutil.copyfile(scr, dst)
-    except:
-        # Create new file
-        if not os.path.exists(dst):
-            return "A folder does not exist"
+    if card_part_number != "":
+        # Get file name
+        new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
+        new_file_name = file_name.replace(old_revision, new_revision)
+        # Get new location
+        new_location = GET_FOLDER_PATH('paths.txt', 'design_folder_path') + "/" + str(card_part_number) + '-xx'
+        if status == "New":
+            # Source path to get file template (Rev00)
+            scr = folder_template_location + "/" + file_name + "." + file_extension
+            # Destination
+            dst = new_location + "/" + new_file_name + "." + file_extension
+            try:
+                shutil.copyfile(scr, dst)
+            except:
+                # Create new file
+                if not os.path.exists(dst): return "A folder does not exist"
+                else:                       return "Error!"
+        elif status == "Override":
+            pass
+        elif status == "Edit":
+            pass
+        elif status == "Release":
+            pass
         else:
-            return "Error!"
-    
-    load_workbook = openpyxl.load_workbook(dst)
-    active_sheet = workbook[sheet_name] # active "Sheet1"
-    """
+            pass
+        # load workbook
+        load_workbook = openpyxl.load_workbook(dst)
+        # Active "Sheet1" in workbook
+        active_sheet = workbook[sheet_name]
+    else: 
+        pass
+    # end if card_part_number != ""
     return "EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE"
 
 def EXPORT_PCB_PAD_LOCATION_FILE():
