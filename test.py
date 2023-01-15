@@ -1,45 +1,41 @@
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+import openpyxl
+import numpy as np
+import os
+from datetime import datetime
+path = "D:/Robo_data/Python/Projects/myproject2/app/templates/YYY-XXXXXX-xx_Array full sites for reference_Rev00.xlsx"
+workbook = openpyxl.load_workbook(path)
+sheet = workbook['Revision']
 
+columnCount = sheet.max_column
+rowCount    = sheet.max_row
+row_index = 0
+column_index = 0
 
-class MainWindow(QMainWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setWindowTitle('PyQt QTreeWidget')
-        self.setGeometry(100, 100, 400, 200)
+for row in range(1, rowCount+1):
+    for column in range(1,columnCount+1):
+        if sheet.cell(row, column).value == "ORG":
+            row_index = row
+            column_index = column
+            break
 
-        # tree
-        tree = QTreeWidget(self)
-        tree.setColumnCount(2)
-        tree.setColumnWidth(0, 150)
-        tree.setColumnWidth(1, 150)
-        tree.setHeaderLabels(['Part Number', 'Files'])
+for row in range(row_index, rowCount+1):
+    if sheet.cell(row, column_index).value != None and sheet.cell(row+1, column_index).value == None:
+        sheet.cell(row+1, column_index).value = os.getlogin() + str(row) 
+        
+        if sheet.cell(row, column_index - 2).value == "REVISION":
+            sheet.cell(row+1, column_index - 2).value = 1
+        else:
+            sheet.cell(row+1, column_index - 2).value = sheet.cell(row, column_index - 2).value + 1
+        
+        if sheet.cell(row, column_index - 1).value == "DESCRIPTION":
+            sheet.cell(row+1, column_index - 1).value = "Initial"
+        else:
+            sheet.cell(row+1, column_index - 1).value = "Update"
+        now = datetime.now()
+        sheet.cell(row+1, column_index + 2).value = now.strftime("%b-%d-%Y")
+        break
+    else:
+        continue
 
-        part_numbers = ['401-XXXXXX-01','PCX-000000-xx','LGP-000000-01']
-        employees = {
-            '401-XXXXXX-01': ['401-XXXXXX-01.sldprt','401-XXXXXX-01.slddrw'],
-            'PCX-000000-xx': ['PCX-000000-xx.sldasm','PCX-000000-xx.slddrw'],
-            'LGP-000000-01': ['LGP-000000-01.sldprt','LGP-000000-01.slddrw'],
-        }
+workbook.save(path)
 
-        # addition data to the tree
-        for part_number in part_numbers:
-            part_item = QTreeWidgetItem(tree)
-            part_item.setText(0, part_number)
-            # set the child
-            for employee in employees[part_number]:
-                employee_item   = QTreeWidgetItem(tree)
-                employee_item.setText(1, employee)
-
-                part_item.addChild(employee_item)
-
-        # place the tree on the main window
-        self.setCentralWidget(tree)
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())

@@ -24,6 +24,7 @@ class MainWindow(QMainWindow):
 
         # Variables to store XY coordinates list
         self.X, self.Y = [], []
+        self.XY_FILE_PATH = ""
         
         # Variables to store XY coordinates list after pattern
         self.X_list_pattern, self.Y_list_pattern = [], []
@@ -87,7 +88,7 @@ class MainWindow(QMainWindow):
         table_tab2_layout.addWidget(self.table_tab2)
         self.Tab_content.tab2.setLayout(table_tab2_layout)
 
-        if CARD_PART_NUMBER['VALUE#'] != "": self.tree_tab3 = QTreeWidget()
+        # if CARD_PART_NUMBER['VALUE#'] != "": self.tree_tab3 = QTreeWidget()
             
         # Set main windoe title
         self.setWindowTitle(APP_NAME)
@@ -542,13 +543,15 @@ class MainWindow(QMainWindow):
 
     # class MainWindow(QMainWindow):
     def CALL_IMPORT_EXCEL2TABLE_FUNC(self):
-        #Reset status
+        # Reset status
         self.status.showMessage("Ready!")
         self.status.setStyleSheet("color: rgb(255,255,255)")
+        # Reset some variables
         self.X, self.Y              = [], []
         self.PAD_NAME_LIST          = []
         self.PAD_NUMBER_LIST        = []
         self.DUT_NAME_LIST          = []
+        # Set up new Welcome label
         self.Welcome_label.setText('<font color="#FFFFFF">Nidec</font> <font color="#FFFFFF">SV</font> <font color="#FFFFFF">TCL</font>')
         self.Welcome_label.setFont(QFont("3ds", 30))
 
@@ -560,7 +563,9 @@ class MainWindow(QMainWindow):
             self.status.setStyleSheet("color: rgb(50,255,50)")
             return
         else:
-            status, sheet_name = IMPORT_EXCEL2TABLE(self.table.TableWidget, path = path, extension = file_extension)
+            status, sheet_name = IMPORT_EXCEL2TABLE(self.table.TableWidget, \
+                                                    path = path, \
+                                                    extension = file_extension)
             if status == 0:
                 self.status.showMessage("No any sheet's selected!")
                 self.status.setStyleSheet("color: red")
@@ -577,7 +582,8 @@ class MainWindow(QMainWindow):
             DIE_CONFIG["Y_OR_ROW"] = 1
             DIE_CONFIG['VALUE'].setText("X = " + str(DIE_CONFIG["X_OR_COLUMN"])+" col  |  " + \
                                         "Y = " + str(DIE_CONFIG["Y_OR_ROW"])+" row")
-            
+            self.XY_FILE_PATH = path
+
             # self.get_info.Reset_button_clicked()
         
     # class MainWindow(QMainWindow):        
@@ -727,14 +733,14 @@ class MainWindow(QMainWindow):
         self.status.showMessage("Ready!")
         # Create GetInfo class
         self.get_info = GetInfo([self.PAD_NUMBER_POSITION,       self.PAD_NAME_POSITION,             self.DUT_NAME_POSITION,     self.DUT_NAME_FORMAT,
-                            self.DUT_NAME_DELIMITER,        self.NC_POSITION,                   self.NC_DENOTE,             self.PAD_SIZE_UNIT,
-                            self.Is_PAD_BUMP,               MIN_PAD_SIZE["D"],                  MIN_PAD_SIZE["X"],          MIN_PAD_SIZE["Y"],
-                            self.STEPPING_DISTANCE_UNIT,    STEPPING_DISTANCE['X'],             STEPPING_DISTANCE['Y'],    CUSTOMER_NAME["NAME"],
-                            DEVICE_NAME["NAME"],            SPACE_TRANSFORMER_TYPE['TYPE'],     PROBING_TEMP["VALUE#"],     self.DUTY_CYCLE_TYPE,
-                            MAX_CURRENT['VALUE#'],          MAX_FREQUENCY["VALUE#"],            self.KEEP_OUT_TYPE,         self.KEEP_OUT_UNIT,
-                            KEEP_OUT_TYPE['RECTANGLE_X_SIZE'],  KEEP_OUT_TYPE['RECTANGLE_Y_SIZE'], KEEP_OUT_TYPE['CIRCLE_DIAMETER'], self.CURRENT_UNIT, 
-                            self.FREQUENCY_UNIT,            WAFER_PAD['MATERIAL'],              PROBE_PART_NUMBER['PART_NUMBER'],   CARD_PART_NUMBER['VALUE#'],
-                            self.DIE_CONFIG])
+                                self.DUT_NAME_DELIMITER,        self.NC_POSITION,                   self.NC_DENOTE,             self.PAD_SIZE_UNIT,
+                                self.Is_PAD_BUMP,               MIN_PAD_SIZE["D"],                  MIN_PAD_SIZE["X"],          MIN_PAD_SIZE["Y"],
+                                self.STEPPING_DISTANCE_UNIT,    STEPPING_DISTANCE['X'],             STEPPING_DISTANCE['Y'],    CUSTOMER_NAME["NAME"],
+                                DEVICE_NAME["NAME"],            SPACE_TRANSFORMER_TYPE['TYPE'],     PROBING_TEMP["VALUE#"],     self.DUTY_CYCLE_TYPE,
+                                MAX_CURRENT['VALUE#'],          MAX_FREQUENCY["VALUE#"],            self.KEEP_OUT_TYPE,         self.KEEP_OUT_UNIT,
+                                KEEP_OUT_TYPE['RECTANGLE_X_SIZE'],  KEEP_OUT_TYPE['RECTANGLE_Y_SIZE'], KEEP_OUT_TYPE['CIRCLE_DIAMETER'], self.CURRENT_UNIT, 
+                                self.FREQUENCY_UNIT,            WAFER_PAD['MATERIAL'],              PROBE_PART_NUMBER['PART_NUMBER'],   CARD_PART_NUMBER['VALUE#'],
+                                self.DIE_CONFIG])
         # Get info
         self.PAD_NUMBER_POSITION,       self.PAD_NAME_POSITION,             self.DUT_NAME_FORMAT,   self.DUT_NAME_POSITION, \
         self.NC_POSITION,               self.NC_DENOTE,                     CUSTOMER_NAME["NAME"],  DEVICE_NAME["NAME"], \
@@ -846,7 +852,7 @@ class MainWindow(QMainWindow):
     def CALL_GENERATE_XY_LIST_SV_FORMAT(self):
         self.status.showMessage("Ready!")
         self.status.setStyleSheet("color: rgb(255,255,255)")
-        
+        # Show data on Tab2
         self.table_tab2.TableWidget = GENERATE_XY_LIST_SV_FORMAT(self.table_tab2.TableWidget, 
                                                                  self.DUT_NAME_LIST, 
                                                                  self.PAD_NUMBER_LIST,
@@ -882,11 +888,16 @@ class MainWindow(QMainWindow):
                 self.export_ROBE_HEAD_XY_FILE_file, \
                 self.export_PCB_PADS_LOCATION_FILE_file, \
                 self.export_IUA_PLUS_FILE_file, \
-                self.export_CRD_PLUS_FILE_file] = EXPORT_FILES(self.table_tab2.TableWidget, input_parameters)
+                self.export_CRD_PLUS_FILE_file] = EXPORT_FILES(self.X, \
+                                                                self.Y, \
+                                                                self.PAD_NUMBER_LIST, \
+                                                                self.PAD_NAME_LIST, \
+                                                                input_parameters, \
+                                                                self.XY_INPUT_UNIT, \
+                                                                CARD_PART_NUMBER['VALUE#'])
  
         if status == "Run": 
-            self.EXPORT_SPEC_FILE()
-            self.status.showMessage("Export Done!")     
+            self.EXPORT_SPEC_FILE()    
         else:
             self.status.showMessage(status)
         # end if
@@ -898,32 +909,37 @@ class MainWindow(QMainWindow):
         # Reset Status
         self.status.showMessage("Ready!")
         if CARD_PART_NUMBER['VALUE#'] != "":
-            path = "result/" + CARD_PART_NUMBER['VALUE#'] + "_spec_file.txt"
+            # Add time to SPEC FILE
+            now = datetime.now()
+            current_time = now.strftime("%b_%d_%Y_%H_%M_%S")
+            # Place to put spec file
+            path = "result/" + CARD_PART_NUMBER['VALUE#'] + "-xx/" + CARD_PART_NUMBER['VALUE#'] + "_spec_file_" + str(current_time) +".txt"
+            # create and write data to spec file
             with open(path, "w") as f:
-                # Add time to SPEC FILE
-                now = datetime.now()
-                current_time = now.strftime("%b-%d-%Y %H:%M:%S")
                 # SPEC file content:
-                f.write('OWNER='                    + os.getlogin() + "\n")
-                f.write('TIME='                     + current_time + "\n")
-                f.write("CARD_PART_NUMBER="         + CARD_PART_NUMBER['VALUE#'] + "\n")
+                f.write('OWNER='                    + os.getlogin()                 + "\n")
+                f.write('TIME='                     + current_time                  + "\n")
+                f.write("CARD_PART_NUMBER="         + CARD_PART_NUMBER['VALUE#']    + "\n")
+                f.write("XY_FILE_PATH= "            + self.XY_FILE_PATH             + "\n")
                 f.write("CUSTOMER_NAME="            + CUSTOMER_NAME['VALUE'].text() + "\n")
-                f.write("XY_INPUT_UNIT="            + self.XY_INPUT_UNIT + "\n")
-                f.write("STEPPING_DISTANCE_UNIT="   + self.STEPPING_DISTANCE_UNIT + "\n")
-                f.write("PAD_SIZE_UNIT="            + self.PAD_SIZE_UNIT + "\n")
-                f.write("DUT_NAME_FORMAT="          + self.DUT_NAME_FORMAT + "\n")
-                f.write("DUT_NAME_DELIMITER="       + self.DUT_NAME_DELIMITER + "\n")
-                f.write("DUT_NAME_POSITION="        + str(self.DUT_NAME_POSITION) + "\n")
-                f.write("PAD_NAME_POSITION="        + str(self.PAD_NAME_POSITION) + "\n")
+                f.write("XY_INPUT_UNIT="            + self.XY_INPUT_UNIT            + "\n")
+                f.write("STEPPING_DISTANCE_UNIT="   + self.STEPPING_DISTANCE_UNIT   + "\n")
+                f.write("PAD_SIZE_UNIT="            + self.PAD_SIZE_UNIT            + "\n")
+                f.write("DUT_NAME_FORMAT="          + self.DUT_NAME_FORMAT          + "\n")
+                f.write("DUT_NAME_DELIMITER="       + self.DUT_NAME_DELIMITER       + "\n")
+                f.write("DUT_NAME_POSITION="        + str(self.DUT_NAME_POSITION)   + "\n")
+                f.write("PAD_NAME_POSITION="        + str(self.PAD_NAME_POSITION)   + "\n")
                 f.write("PAD_NUMBER_POSITION="      + str(self.PAD_NUMBER_POSITION) + "\n")
-                f.write("XY_Start_Row_Index="       + str(self.XY_Start_Row_Index) + "\n")
-                f.write("XY_End_Row_Index="         + str(self.XY_End_Row_Index)   + "\n")
-                f.write("Is_PAD_BUMP="              + str(self.Is_PAD_BUMP)       + "\n")
-                f.write("NC_POSITION="              + str(self.NC_POSITION)   + "\n")           
-                f.write("NC_DEMOTE="                + self.NC_DENOTE          + "\n")      
-                f.write("KEEP_OUT_TYPE="            + self.KEEP_OUT_TYPE      + "\n")  
-                f.write("KEEP_OUT_UNIT="            + self.KEEP_OUT_UNIT      + "\n")  
-                f.write("DUTY_CYCLE_TYPE="          + self.DUTY_CYCLE_TYPE    + "\n")
+                f.write("XY_Start_Row_Index="       + str(self.XY_Start_Row_Index)  + "\n")
+                f.write("XY_End_Row_Index="         + str(self.XY_End_Row_Index)    + "\n")
+                f.write("Is_PAD_BUMP="              + str(self.Is_PAD_BUMP)         + "\n")
+                f.write("NC_POSITION="              + str(self.NC_POSITION)         + "\n")           
+                f.write("NC_DEMOTE="                + self.NC_DENOTE                + "\n")      
+                f.write("KEEP_OUT_TYPE="            + self.KEEP_OUT_TYPE            + "\n")  
+                f.write("KEEP_OUT_UNIT="            + self.KEEP_OUT_UNIT            + "\n")  
+                f.write("DUTY_CYCLE_TYPE="          + self.DUTY_CYCLE_TYPE          + "\n")
+            
+            self.status.showMessage("Export Done! Spec file is available.") 
         else:
             self.status.showMessage("No Card Number!")
             return
@@ -1415,6 +1431,8 @@ class SheetsNameDialog(QDialog):
 
         # Set layout
         self.setLayout(self.layout)
+        self.show()
+        self.exec_()
     # End of __init__() function
 
     # class SheetsNameDialog(QDialog):
@@ -1427,35 +1445,61 @@ class SheetsNameDialog(QDialog):
         return self.item
 # End if Dialog class #
 
-def IMPORT_EXCEL2TABLE(object_, path="", extension=""):
+def IMPORT_EXCEL2TABLE(table_widget, path = "", extension=""):
+    # Input parameter:
+    # 1. table_widget: table in tab1
+    # 2. path: full path of excel file
+    # 3. extension: extension of excel file
+    
     # Get sheets name in excel file
     sheet_names = pd.ExcelFile(path).sheet_names
-    # Call List Dialog to choose sheet need be imported
+    
+    # Call SheetsNameDialog() to choose sheet need be imported from sheets in excel file.
     dialog = SheetsNameDialog(sheet_names)
-    dialog.show()
-    dialog.exec_()
-
+    
     if dialog.Return() == "": # If Sheet Name is empty
         return 0, ""
 
     # Read excel data
-    df = pd.read_excel(io=path, sheet_name=dialog.Return(), engine=None)
+    df = pd.read_excel(io = path, sheet_name = dialog.Return(), engine=None)
+
+    # Check df size
     if df.size == 0:
         return 0, ""
-
+    
+    # Remove "nan" cell to empty char
     df.fillna("", inplace=True)
+    
+    # Change float value from float64 to float32
+    for row in range(df.shape[0]):
+        for col in range(df.shape[1]):
+            if isinstance(df.iloc[row, col], float):
+                if sys.getsizeof(df.iloc[row, col]) < 32:
+                    df.iloc[row, col] = np.float32(df.iloc[row, col])
+                if sys.getsizeof(df.iloc[row, col]) >= 32:
+                    df.iloc[row, col] = np.float64(df.iloc[row, col])
+    
+    # Replace columns header = Unnamed to empty char
+    for col in df.columns:
+        try:
+            float(col)
+        except:
+            if col.find("Unnamed:") != -1:
+                df.rename(columns={col:''}, inplace=True)
+                    
+    # Set number of rows and columns silimar exel file
+    table_widget.setRowCount(df.shape[0]+1)
+    table_widget.setColumnCount(df.shape[1])
 
-    # Set number of row and column same as exel file
-    object_.setRowCount(df.shape[0]+1)
-    object_.setColumnCount(df.shape[1])
-
-    [object_.setColumnWidth(i, 60) for i in range(df.shape[1])]
-    [object_.setRowHeight(i, 5) for i in range(df.shape[0])]
+    # Set columns width
+    [table_widget.setColumnWidth(i, 60) for i in range(df.shape[1])]
+    # Set rows height
+    [table_widget.setRowHeight(i, 5) for i in range(df.shape[0])]
     
-    [object_.setItem(0, col, QTableWidgetItem(str(df.columns[col]))) for col in range(object_.columnCount())]
+    [table_widget.setItem(0, col, QTableWidgetItem(str(df.columns[col]))) for col in range(table_widget.columnCount())]
     
-    [[object_.setItem(row+1, col, QTableWidgetItem(str(df.iloc[row, col]))) for col in range(object_.columnCount())] for row in range(object_.rowCount()-1)]
-    
+    [[table_widget.setItem(row + 1, col, QTableWidgetItem(str(df.iloc[row, col]))) for col in range(table_widget.columnCount())] for row in range(table_widget.rowCount()-1)]
+ 
     # Return value
     return 1, dialog.Return()
 # End of IMPORT_EXCEL_FILE function #
@@ -1624,16 +1668,15 @@ class GetInfo(QDialog):
         self.PAD_X_SIZE_Textbox = QLineEdit()
         if self.pad_x_size > 0:                 self.PAD_X_SIZE_Textbox.setText(str(self.pad_x_size))
         
-        self.PAD_Y_SIZE_Textbox = QLineEdit()
-        if self.pad_y_size > 0:                 self.PAD_Y_SIZE_Textbox.setText(str(self.pad_y_size))
+        self.PAD_Y_SIZE_Textbox         = QLineEdit()
+        if self.pad_y_size > 0:         self.PAD_Y_SIZE_Textbox.setText(str(self.pad_y_size))
        
         self.TEST_TEMPERATURE_Textbox   = QLineEdit()
         if self.test_temperature != 0.0: 
             self.TEST_TEMPERATURE_Textbox.setText(str(self.test_temperature))
 
-        self.MAX_CURRENT_Textbox= QLineEdit()
-        if self.max_current != 0.0: 
-            self.MAX_CURRENT_Textbox.setText(str(self.max_current))
+        self.MAX_CURRENT_Textbox        = QLineEdit()
+        if self.max_current != 0.0:     self.MAX_CURRENT_Textbox.setText(str(self.max_current))
 
         self.MAX_FREQUENCY_Textbox      = QLineEdit()
         if self.max_frequency != 0.0: 
@@ -1647,16 +1690,14 @@ class GetInfo(QDialog):
         if self.keep_out_Y_size != 0.0:
             self.KEEP_OUT_Y_SIZE_Textbox.setText(str(self.keep_out_Y_size))
         
-        self.KEEP_OUT_DIAMETER_Textbox    = QLineEdit()
+        self.KEEP_OUT_DIAMETER_Textbox  = QLineEdit()
         if self.keep_out_diameter != 0.0:
             self.KEEP_OUT_DIAMETER_Textbox.setText(str(self.keep_out_diameter))
 
         self.STEP_X_Textbox = QLineEdit()
+        if self.stepping_distance_x != 0.0: self.STEP_X_Textbox.setText(str(self.stepping_distance_x))
         self.STEP_Y_Textbox = QLineEdit()
-        if self.stepping_distance_x != 0.0:
-            self.STEP_X_Textbox.setText(str(self.stepping_distance_x))
-        if self.stepping_distance_y != 0.0:
-            self.STEP_Y_Textbox.setText(str(self.stepping_distance_y))
+        if self.stepping_distance_y != 0.0: self.STEP_Y_Textbox.setText(str(self.stepping_distance_y))
 
         self.WAFER_PAD_MATERIAL_Textbox = QLineEdit()
         if self.wafer_material != "":       self.WAFER_PAD_MATERIAL_Textbox.setText(self.wafer_material)
@@ -2452,8 +2493,10 @@ class Notification(QDialog):
 # End class Notification
 
 # Start EXPORT_FILES function
-def EXPORT_FILES(table_TableWidget , option):
-    # export_options include: 
+def EXPORT_FILES(X_one_Dut, Y_one_Dut, pad_number_list, pad_name_list, options, input_unit, card_part_number):
+    # Input parameters:
+    # 1. table_TableWidget
+    # 2  options include: 
         # [0] = ALL_FILE_CHECK
         # [1] = XY_FORMAT_FOR_IUA_PLUS_CHECKBOX
         # [2] = ARRAY_FULL_SITE_FILE_CHECKBOX
@@ -2463,7 +2506,7 @@ def EXPORT_FILES(table_TableWidget , option):
         # [6] = CRD_PLUS_FILE_CHECKBOX
     
     if not os.path.exists("paths.txt"):
-        return "paths.txt file does not existed.", option
+        return "paths.txt file does not existed.", options
     
     # Call ExportOption dialog and get choices
     status = [XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[0]],
@@ -2486,8 +2529,8 @@ def EXPORT_FILES(table_TableWidget , option):
               CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[2]],
               ]
     
-    export_options  = ExportOption(option, status)
-    option          = export_options.Return()
+    export_options  = ExportOption(options, status)
+    options         = export_options.Return()
     
     XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[0]], \
     XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS[REVISION_STATUS[1]], \
@@ -2508,36 +2551,65 @@ def EXPORT_FILES(table_TableWidget , option):
     CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[1]], \
     CRD_PLUS_EXPORT_STATUS[REVISION_STATUS[2]], = export_options.Return_status()
 
-    if option.count(False) == len(option):
-        return "No any files were exported!", option # return 0, option (0: no any exported files!)
-
-    if option[0] == True:
-        print(EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE())
-        print(EXPORT_PCB_PAD_LOCATION_FILE())
-        print(EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE())
-        print(EXPORT_IUA_PLUS_FILE())
-        print(EXPORT_CRD_PLUS_FILE())
-        print(EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE())
+    if options.count(False) == len(options):
+        return "No any files were exported!", options # return 0, option (0: no any exported files!)
+    
+    # Check status (Edit, Release or Override) and export files
+    if options[0] == True:
+        return_value = EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(X = X_one_Dut, \
+                                            Y = Y_one_Dut, \
+                                            pad_number_list = pad_number_list, \
+                                            pad_name_list = pad_name_list,  \
+                                            xy_input_unit = input_unit, \
+                                            status = XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS, \
+                                            card_part_number=card_part_number)
+        EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE(X = X_one_Dut, \
+                                                        Y = Y_one_Dut, \
+                                                        pad_number_list = pad_number_list, \
+                                                        pad_name_list = pad_name_list, \
+                                                        xy_input_unit = input_unit, \
+                                                        status = ARRAY_FULL_SITE_EXPORT_STATUS, \
+                                                        stepping_distance = (0,0), \
+                                                        card_part_number=card_part_number, \
+                                                        )
+        # print(EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE(PROBE_HEAD_XY_FILE_EXPORT_STATUS))
+        # print(EXPORT_PCB_PAD_LOCATION_FILE(PCB_PAD_LOCATION_EXPORT_STATUS))
+        # print(EXPORT_IUA_PLUS_FILE(IUA_PLUS_EXPORT_STATUS))
+        # print(EXPORT_CRD_PLUS_FILE(CRD_PLUS_EXPORT_STATUS))
     else:
-        if option[1] == True:
-            print(EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE())
-        
-        if option[2] == True:
-            print(EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE())
-        
-        if option[3] == True:
-            print(EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE())
-        
-        if option[4] == True:
-            print(EXPORT_PCB_PAD_LOCATION_FILE())
-        
-        if option[5] == True:
-            print(EXPORT_IUA_PLUS_FILE())
-        
-        if option[6] == True:
-            print(EXPORT_CRD_PLUS_FILE())
+        if options[1] == True:
+            return_value = EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(X = X_one_Dut, \
+                                                Y = Y_one_Dut, \
+                                                pad_number_list = pad_number_list, \
+                                                pad_name_list = pad_name_list,  \
+                                                xy_input_unit = input_unit, \
+                                                status = XY_FORMAT_FOR_IUA_PLUS_EXPORT_STATUS, \
+                                                card_part_number=card_part_number)
+        if options[2] == True:
+            EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE(X = X_one_Dut, \
+                                                        Y = Y_one_Dut, \
+                                                        pad_number_list = pad_number_list, \
+                                                        pad_name_list = pad_name_list, \
+                                                        xy_input_unit = input_unit, \
+                                                        status = ARRAY_FULL_SITE_EXPORT_STATUS, \
+                                                        stepping_distance = (0,0), \
+                                                        card_part_number=card_part_number, \
+                                                        )
+            pass
+        if options[3] == True:
+            # print(EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE(PROBE_HEAD_XY_FILE_EXPORT_STATUS))
+            pass
+        if options[4] == True:
+            # print(EXPORT_PCB_PAD_LOCATION_FILE(PCB_PAD_LOCATION_EXPORT_STATUS))
+            pass
+        if options[5] == True:
+            # print(EXPORT_IUA_PLUS_FILE(IUA_PLUS_EXPORT_STATUS))
+            pass
+        if options[6] == True:
+            # print(EXPORT_CRD_PLUS_FILE(CRD_PLUS_EXPORT_STATUS))
+            pass
 
-    return "Run", option
+    return "Run", options
 # End of EXPORT_FILES function
 
 # Start class SplashScreen

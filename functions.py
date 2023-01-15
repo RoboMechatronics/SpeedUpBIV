@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import time
 import shutil
+import openpyxl
+from variables import *
 # from scipy.spatial.distance import euclidean
 
 def GET_XY_FROM_MOUSE(Table):
@@ -153,11 +155,14 @@ class ClosestPair:
         self.min_distance = self.Calculate(Px, Py, n)
         
     def Calculate(self, Px, Py, n):
-        # Simple case
-        if n == 2:
-            return dist(self.P[0], self.P[1])
-        if n == 3:
-            return min(dist(self.P[0], self.P[1]), dist(self.P[0], self.P[2]), dist(self.P[1], self.P[2]))
+        try:
+            # Simple case
+            if n == 2:
+                return dist(self.P[0], self.P[1])
+            if n == 3:
+                return min(dist(self.P[0], self.P[1]), dist(self.P[0], self.P[2]), dist(self.P[1], self.P[2]))
+        except:
+            pass
         
         # Divide 
         mid = n // 2
@@ -231,6 +236,7 @@ def GET_FILE_PATH(path_file, file_need_find):
                 file_extension = i[i.index("."):]
                 file_extension = file_extension[1:]
             break
+        
     file_extension = file_extension.replace("\n", "")
     file_name = file_name.replace("\n", "")
     # completed to get file name, file extension from path.txt file
@@ -460,67 +466,282 @@ def REVISION_CHANGE_TYPE(old_revision, type = "Edit"):
     # if type == "Release"
     return new_revision # like: 02, A, B, A02
 
-def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(card_part_number="", X=[], Y=[], status="", unit="mm", sheet_name = 'Sheet1'):
+def EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE(X, Y, \
+                                        pad_number_list, \
+                                        pad_name_list, \
+                                        xy_input_unit,  \
+                                        status=[], \
+                                        card_part_number="", \
+                                        sheet_name = 'Sheet1'):
     # Input Parameters:
-    #   1.card_part_number as PCX-000000, MSP-000000
-    #   2.X coordinates from tab 1 table, like X = [0,1,2,3,4,5,...,n]
-    #   3.Y coordinates from tab 1 table, like Y = [0,1,2,3,4,5,...,n]
-    #   4.sheet_name is "Sheet1" as default
-    #   5.status: Release, Edit, Override, New
+    #   1. table_TableWidget is a TableWidget
+    #   3.card_part_number as PCX-000000, MSP-000000
+    #   4.status: Release, Edit, Override, New
+    #   5.sheet_name is "Sheet1" as default
     # Note Unit is mm as default, convert to mm if unit is not 'mm'
     
+    if not X or not Y: # not export anything of X and Y list are empty
+        # print("empty")
+        return "Empty"
+        
     # Get file name, file extension from path.txt file
     # example: file_name = "YYY-XXXXXX_XY input format for IUA_plus_Rev00" and file_extension = "xlsx"
     file_name, file_extension = GET_FILE_PATH('paths.txt', 'XY_FORMAT_FOR_IUA_PLUS_FILENAME')
-    # Get folder template path
-    folder_template_location    = GET_FOLDER_PATH('paths.txt', 'folder_template_path')
-    # Get revision in file name:
-    revision_string_format      = GET_REVISION_STRING('paths.txt', "REVISION_FORMAT")
-    revision_pos_in_file_name   = file_name.index(revision_string_format)
-    revision_string             = file_name[revision_pos_in_file_name:]
-    # Get old revision
-    old_revision = revision_string[len(revision_string_format):]
-    # Get new revision base on status value
-    new_revision = REVISION_CHANGE_TYPE(old_revision, status) # status  = ["Release", "Edit", "Override", "New"]
+    
+    path = GET_FOLDER_PATH('paths.txt', 'design_folder_path') + "/" + str(card_part_number) + '-xx'
+    
+    file_exist = False
+    XY_exist_name = ""
     
     if card_part_number != "":
-        # Get file name
-        new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
-        new_file_name = file_name.replace(old_revision, new_revision)
-        # Get new location
-        new_location = GET_FOLDER_PATH('paths.txt', 'design_folder_path') + "/" + str(card_part_number) + '-xx'
-        if status == "New":
-            # Source path to get file template (Rev00)
-            scr = folder_template_location + "/" + file_name + "." + file_extension
-            # Destination
-            dst = new_location + "/" + new_file_name + "." + file_extension
-            try:
-                shutil.copyfile(scr, dst)
-            except:
-                # Create new file
-                if not os.path.exists(dst): return "A folder does not exist"
-                else:                       return "Error!"
-        elif status == "Override":
-            pass
-        elif status == "Edit":
-            pass
-        elif status == "Release":
-            pass
+ 
+        if os.path.exists(path):
+            dir_list = os.listdir(path)
+
+            for i in dir_list:
+                
+                string = card_part_number + "-xx_XY Format for IUA Plus" # like: "PCX-000000-xx_XY Format for IUA Plus"
+
+                if (i.find(string) != -1) and (i[i.find(".")+1:] == file_extension):
+                    file_exist = True
+                    XY_exist_name = i
+                else:
+                    continue
+            # end for
         else:
+            return "Card Folder doesn't exist!" # end if
+    else:
+        return "Card part number is empty!"  # alway need card_part_number to add to file, return empty char if this variable is ""
+    
+    if file_exist == False:
+        # Get folder template path
+        folder_template_location        = GET_FOLDER_PATH('paths.txt', 'folder_template_path')
+        revision_string_format          = GET_REVISION_STRING('paths.txt', "REVISION_FORMAT") # like: "Rev"
+        revision_pos_in_file_name       = file_name.index(revision_string_format) # position of "Rev" in file_name
+        revision_string                 = file_name[revision_pos_in_file_name:] # like: "Rev00"
+        new_file_path, new_file_name    = "", ""
+        
+        if card_part_number != "":
+            new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
+            new_file_name = new_file_name.replace(new_file_name[revision_pos_in_file_name:], "Rev01")
+            new_file_path = path + "/" + new_file_name + "." + file_extension
+        
+        scr = folder_template_location + "/" + file_name + "." + file_extension
+        try:
+            shutil.copyfile(scr, new_file_path)
+        except:
+            # Create new file
+            if not os.path.exists(new_file_path): 
+                return "A folder does not exist"
+            else:                       
+                return "Error!"     
+        # Load workbook
+        workbook = openpyxl.load_workbook(new_file_path)
+        # Active sheet "Sheet1"
+        sheet = workbook[sheet_name]
+        for row in range(len(X)):
+            sheet.cell(row+2, 1).value = X[row] 
+            sheet.cell(row+2, 2).value = Y[row]
+            if len(pad_number_list) == len(X):
+                sheet.cell(row+2, 3).value = pad_number_list[row]
+            if len(pad_name_list) == len(X):
+                sheet.cell(row+2, 4).value = pad_name_list[row]  
+        workbook.save(new_file_path)
+        return "Done!"
+        # end if file_exist == False
+        
+    elif file_exist == True: # if the file doesn't exist, check status = ['Edit', 'Release', Override']
+
+        file_name = XY_exist_name
+        # Get folder template path
+        folder_template_location    = GET_FOLDER_PATH('paths.txt', 'folder_template_path')
+        # Get revision in file name:
+        revision_string_format      = GET_REVISION_STRING('paths.txt', "REVISION_FORMAT") # like: "Rev"
+        revision_pos_in_file_name   = file_name.index(revision_string_format) # a position
+        revision_string             = file_name[revision_pos_in_file_name:] # like: "00" or "01"
+      
+        # Get old revision
+        old_revision = revision_string[len(revision_string_format):revision_string.find(".")]
+
+        if card_part_number != "": # if card_part_number is available.
+            # status elements as following:
+            #  status[0] ~ REVISION_STATUS[0] = "Edit"
+            #  status[1] ~ REVISION_STATUS[1] = "Release"
+            #  status[2] ~ REVISION_STATUS[2] = "Override"
+            if status["Edit"] == True and status["Release"] == False and status["Override"] == False: # Edit
+                # Get new revision base on status value
+                new_revision = REVISION_CHANGE_TYPE(old_revision, REVISION_STATUS[0])
+            elif status["Edit"] == False and status["Release"] == True and status["Override"] == False: # Release
+                # Get new revision base on status value
+                new_revision = REVISION_CHANGE_TYPE(old_revision, REVISION_STATUS[1])
+            elif status["Edit"] == False and status["Release"] == False and status["Override"] == True: # Override
+                # Get new revision base on status value
+                new_revision = REVISION_CHANGE_TYPE(old_revision, REVISION_STATUS[2])
+            
+            # Get new file name and new file location
+            new_file_name = file_name.replace(old_revision, new_revision)
+            new_file_path = path + "/" + new_file_name
+            
+            # Get exist file name/file path
+            scr = path + "/" + XY_exist_name
+            
+            # Copy file from scr to new_file_path and rename it
+            shutil.copyfile(scr, new_file_path)
+            
+            # load workbook
+            load_workbook = openpyxl.load_workbook(new_file_path)
+            # Active "Sheet1" in workbook
+            sheet = load_workbook[sheet_name]
+            
+            # Add data from X, Y list into actived sheet
+            for row in range(len(X)):
+                sheet.cell(row+2, 1).value = X[row] 
+                sheet.cell(row+2, 2).value = Y[row]
+                if len(pad_number_list) == len(X):
+                    sheet.cell(row+2, 3).value = pad_number_list[row]
+                if len(pad_name_list) == len(Y):
+                    sheet.cell(row+2, 4).value = pad_name_list[row]  
+            # Save workbook
+            load_workbook.save(new_file_path)
+        else: # if card_part_number is empty
             pass
-        # load workbook
-        load_workbook = openpyxl.load_workbook(dst)
-        # Active "Sheet1" in workbook
-        active_sheet = workbook[sheet_name]
-    else: 
-        pass
-    # end if card_part_number != ""
+        # end if
+    else:
+        return ""
+    # Completed
     return "EXPORT_XY_FORMAT_FOR_IUA_PLUS_FILE"
 
 def EXPORT_PCB_PAD_LOCATION_FILE():
     return "EXPORT_PCB_PAD_LOCATION_FILE"
 
-def EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE():
+def EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE(X, Y, \
+                                                pad_number_list, \
+                                                pad_name_list, \
+                                                xy_input_unit,  \
+                                                status=[], \
+                                                stepping_distance = [], \
+                                                card_part_number="", \
+                                                sheet_name = 'XY list'):
+    # Input parameter:
+    #   1. X: X list after pattern
+    #   2. Y: Y list after pattern
+    #   3. pad_number_list: pad number list after pattern
+    #   4. xy_input_unit: mm as default, convert to mm if not
+    #   5. status: "Release", "Edit" or "Override"
+    #   6. stepping_distance=[X_step, Y_step] to check with X, Y one DUT site.
+    #   7. card_part_number
+    #   8. sheet_name = "XY list" as default for this file
+    # Return value:
+    #   Return file name if this function are completed
+    
+    # Check X and Y list are empty or not
+    if not X or not Y: # not export anything of X and Y list are empty
+        # print("empty")
+        return "Empty"
+    # Declare some variables
+    path = ""
+    file_exist = False
+    XY_exist_name = ""
+    
+    # Get file_name and file_extension from template
+    file_name, file_extension = GET_FILE_PATH('paths.txt', 'ARRAY_FULL_SITE_TEMPLATE_FILENAME')
+    
+    # Check file does exited or not yet base on card_part_number
+    if card_part_number != "":
+        path = GET_FOLDER_PATH('paths.txt', 'design_folder_path') + "/" + str(card_part_number) + '-xx'
+        if os.path.exists(path):
+            dir_list = os.listdir(path)
+            for i in dir_list:
+                string = card_part_number + "-xx_Array full sites for reference" 
+                # string is like: "PCX-000000-xx_Array full sites for reference"
+                if (i.find(string) != -1) and (i[i.find(".")+1:] == file_extension):  #if string is included in files list and match file extension
+                    file_exist = True
+                    XY_exist_name = i # get exist file name
+                else: # if string is not included in files list and not match file extension
+                    continue
+            # end for
+        else:
+            return "Card Folder doesn't exist!" # end if
+    else:
+        return "Card part number is empty!"  # alway need card_part_number to add to file, return empty char if this variable is ""
+    
+    if file_exist == False: # if file doesn't exist, creating new file Rev01 from template Rev00
+        folder_template_location    = GET_FOLDER_PATH("paths.txt", 'folder_template_path')
+        revision_string_format      = GET_REVISION_STRING('paths.txt', 'REVISION_FORMAT')
+        revision_pos_in_file_name   = file_name.index(revision_string_format)
+        revision_string             = file_name[revision_pos_in_file_name:] # example: Rev00 from template file
+        new_file_path, new_file_name = "", ""
+        
+        if card_part_number != "":
+            new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
+            new_file_name = new_file_name.replace(new_file_name[revision_pos_in_file_name:], "Rev01")
+            new_file_path = path + "/" + new_file_name + "." + file_extension
+        
+        scr = folder_template_location + "/" + file_name + "." + file_extension
+        try:
+            shutil.copyfile(scr, new_file_path)
+        except:
+            if not os.path.exists(new_file_path):
+                return "A folder does not exist"
+            else:
+                return "Error"
+        workbook = openpyxl.load_workbook(new_file_path)
+        sheet = workbook[sheet_name]
+        
+        sheet.cell(4, 3).value = xy_input_unit
+        for row in range(len(X)):
+            sheet.cell(row+6, 2).value = X[row]
+            sheet.cell(row+6, 3).value = Y[row]
+            
+            if len(pad_number_list) == len(X):
+                sheet.cell(row+6, 1).value = pad_number_list[row]
+            if len(pad_name_list) == len(X):
+                sheet.cell(row+6, 4).value = pad_name_list[row]
+            if len(dut_name_list) == len(X):
+                sheet.cell(row+6, 0).value = dut_name_list[row]
+            else:
+                sheet.cell(row+6, 0).value = dut_name_format + ".0"
+        
+        sheet = workbook["Revision"]
+        user_name = os.getlogin()
+        
+        columnCount = sheet.max_column
+        rowCount = sheet.max_row
+        
+        for row in range(1, rowCount + 1):
+            for column in range(1, columnCount + 1):
+                if sheet.cell(row, column).value == "ORG":
+                    row_index = row
+                    column_index = column
+                    break
+        
+        for row in range(row_index, rowCount + 1):
+            a = sheet.cell(row, column_index).value
+            b = sheet.cell(row+1, column_index).value
+            if a != None and b == None:
+                sheet.cell(row+1, column_index).value = os.getlogin()
+            
+            a = sheet.cell(row, column_index-2).value
+            if a == "REVISION":
+                sheet.cell(row+1, column_index - 2).value = 1
+            else:
+                sheet.cell(row+1, column_index - 2).value = sheet.cell(row, column_index - 2).value + 1
+                           
+            a = sheet.cell(row, column - 1).value
+            if a == "DESCRIPTION":
+                sheet.cell(row + 1, column - 1).value = "Initial"
+            else:
+                sheet.cell(row + 1, column - 1).value = "Update"
+            
+            now = datetime.now()
+            sheet.cell(row+1, column_inde+2).value = now.strtime("%b-%d-%Y")
+            break
+        
+        workbook.save(new_file_path)
+        return 'Done'
+    else: # file_exist == True
+        pass
+    
     return "EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE"
 
 def EXPORT_IUA_PLUS_FILE():

@@ -28,6 +28,7 @@ CHART_TOOL = "&Chart tools"
 EDIT_TOOL = "&Edit tools"
 EXPORT_TOOLS = "Export Tools"
 #---------------------------------------------------------------------------------------------------#
+
 CARD_PART_NUMBER = {
     "LABEL": "", # QLabel on main window
     "VALUE": "", # QLabel on main window
