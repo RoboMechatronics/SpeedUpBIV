@@ -892,9 +892,14 @@ class MainWindow(QMainWindow):
                                                                 self.Y, \
                                                                 self.PAD_NUMBER_LIST, \
                                                                 self.PAD_NAME_LIST, \
+                                                                self.DUT_NAME_LIST, \
                                                                 input_parameters, \
                                                                 self.XY_INPUT_UNIT, \
-                                                                CARD_PART_NUMBER['VALUE#'])
+                                                                CARD_PART_NUMBER['VALUE#'], \
+                                                                self.DUT_NAME_FORMAT, \
+                                                                self.NC_LIST, \
+                                                                CUSTOMER_NAME['NAME'], \
+                                                                DEVICE_NAME["NAME"])
  
         if status == "Run": 
             self.EXPORT_SPEC_FILE()    
@@ -913,33 +918,35 @@ class MainWindow(QMainWindow):
             now = datetime.now()
             current_time = now.strftime("%b_%d_%Y_%H_%M_%S")
             # Place to put spec file
-            path = "result/" + CARD_PART_NUMBER['VALUE#'] + "-xx/" + CARD_PART_NUMBER['VALUE#'] + "_spec_file_" + str(current_time) +".txt"
+            parent = "result/" + CARD_PART_NUMBER['VALUE#'] + "-xx"
+            path = parent + "/" + CARD_PART_NUMBER['VALUE#'] + "_spec_file_" + str(current_time) +".txt"
             # create and write data to spec file
-            with open(path, "w") as f:
-                # SPEC file content:
-                f.write('OWNER='                    + os.getlogin()                 + "\n")
-                f.write('TIME='                     + current_time                  + "\n")
-                f.write("CARD_PART_NUMBER="         + CARD_PART_NUMBER['VALUE#']    + "\n")
-                f.write("XY_FILE_PATH= "            + self.XY_FILE_PATH             + "\n")
-                f.write("CUSTOMER_NAME="            + CUSTOMER_NAME['VALUE'].text() + "\n")
-                f.write("XY_INPUT_UNIT="            + self.XY_INPUT_UNIT            + "\n")
-                f.write("STEPPING_DISTANCE_UNIT="   + self.STEPPING_DISTANCE_UNIT   + "\n")
-                f.write("PAD_SIZE_UNIT="            + self.PAD_SIZE_UNIT            + "\n")
-                f.write("DUT_NAME_FORMAT="          + self.DUT_NAME_FORMAT          + "\n")
-                f.write("DUT_NAME_DELIMITER="       + self.DUT_NAME_DELIMITER       + "\n")
-                f.write("DUT_NAME_POSITION="        + str(self.DUT_NAME_POSITION)   + "\n")
-                f.write("PAD_NAME_POSITION="        + str(self.PAD_NAME_POSITION)   + "\n")
-                f.write("PAD_NUMBER_POSITION="      + str(self.PAD_NUMBER_POSITION) + "\n")
-                f.write("XY_Start_Row_Index="       + str(self.XY_Start_Row_Index)  + "\n")
-                f.write("XY_End_Row_Index="         + str(self.XY_End_Row_Index)    + "\n")
-                f.write("Is_PAD_BUMP="              + str(self.Is_PAD_BUMP)         + "\n")
-                f.write("NC_POSITION="              + str(self.NC_POSITION)         + "\n")           
-                f.write("NC_DEMOTE="                + self.NC_DENOTE                + "\n")      
-                f.write("KEEP_OUT_TYPE="            + self.KEEP_OUT_TYPE            + "\n")  
-                f.write("KEEP_OUT_UNIT="            + self.KEEP_OUT_UNIT            + "\n")  
-                f.write("DUTY_CYCLE_TYPE="          + self.DUTY_CYCLE_TYPE          + "\n")
-            
-            self.status.showMessage("Export Done! Spec file is available.") 
+            if os.path.exists(parent):
+                with open(path, "w") as f:
+                    # SPEC file content:
+                    f.write('OWNER='                    + os.getlogin()                 + "\n")
+                    f.write('TIME='                     + current_time                  + "\n")
+                    f.write("CARD_PART_NUMBER="         + CARD_PART_NUMBER['VALUE#']    + "\n")
+                    f.write("XY_FILE_PATH= "            + self.XY_FILE_PATH             + "\n")
+                    f.write("CUSTOMER_NAME="            + CUSTOMER_NAME['VALUE'].text() + "\n")
+                    f.write("XY_INPUT_UNIT="            + self.XY_INPUT_UNIT            + "\n")
+                    f.write("STEPPING_DISTANCE_UNIT="   + self.STEPPING_DISTANCE_UNIT   + "\n")
+                    f.write("PAD_SIZE_UNIT="            + self.PAD_SIZE_UNIT            + "\n")
+                    f.write("DUT_NAME_FORMAT="          + self.DUT_NAME_FORMAT          + "\n")
+                    f.write("DUT_NAME_DELIMITER="       + self.DUT_NAME_DELIMITER       + "\n")
+                    f.write("DUT_NAME_POSITION="        + str(self.DUT_NAME_POSITION)   + "\n")
+                    f.write("PAD_NAME_POSITION="        + str(self.PAD_NAME_POSITION)   + "\n")
+                    f.write("PAD_NUMBER_POSITION="      + str(self.PAD_NUMBER_POSITION) + "\n")
+                    f.write("XY_Start_Row_Index="       + str(self.XY_Start_Row_Index)  + "\n")
+                    f.write("XY_End_Row_Index="         + str(self.XY_End_Row_Index)    + "\n")
+                    f.write("Is_PAD_BUMP="              + str(self.Is_PAD_BUMP)         + "\n")
+                    f.write("NC_POSITION="              + str(self.NC_POSITION)         + "\n")           
+                    f.write("NC_DEMOTE="                + self.NC_DENOTE                + "\n")      
+                    f.write("KEEP_OUT_TYPE="            + self.KEEP_OUT_TYPE            + "\n")  
+                    f.write("KEEP_OUT_UNIT="            + self.KEEP_OUT_UNIT            + "\n")  
+                    f.write("DUTY_CYCLE_TYPE="          + self.DUTY_CYCLE_TYPE          + "\n")
+                
+                self.status.showMessage("Export Done! Spec file is available.") 
         else:
             self.status.showMessage("No Card Number!")
             return
@@ -2493,7 +2500,18 @@ class Notification(QDialog):
 # End class Notification
 
 # Start EXPORT_FILES function
-def EXPORT_FILES(X_one_Dut, Y_one_Dut, pad_number_list, pad_name_list, options, input_unit, card_part_number):
+def EXPORT_FILES(X_one_Dut, \
+                Y_one_Dut, \
+                pad_number_list, \
+                pad_name_list, \
+                dut_name_list, \
+                options, \
+                input_unit, \
+                card_part_number, \
+                dut_name_format, \
+                nc_list, \
+                customer_name, \
+                device_name):
     # Input parameters:
     # 1. table_TableWidget
     # 2  options include: 
@@ -2567,12 +2585,25 @@ def EXPORT_FILES(X_one_Dut, Y_one_Dut, pad_number_list, pad_name_list, options, 
                                                         Y = Y_one_Dut, \
                                                         pad_number_list = pad_number_list, \
                                                         pad_name_list = pad_name_list, \
+                                                        dut_name_list = dut_name_list, \
                                                         xy_input_unit = input_unit, \
                                                         status = ARRAY_FULL_SITE_EXPORT_STATUS, \
                                                         stepping_distance = (0,0), \
                                                         card_part_number=card_part_number, \
                                                         )
-        # print(EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE(PROBE_HEAD_XY_FILE_EXPORT_STATUS))
+        EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE(X = X_one_Dut, \
+                                                            Y = Y_one_Dut, \
+                                                            pad_number_list = pad_number_list, \
+                                                            pad_name_list = pad_name_list, \
+                                                            dut_name_list = dut_name_list, \
+                                                            xy_input_unit = input_unit, \
+                                                            status = PROBE_HEAD_XY_FILE_EXPORT_STATUS, \
+                                                            dut_name_format = dut_name_format, \
+                                                            card_part_number=card_part_number, \
+                                                            nc_list = nc_list,
+                                                            customer_name = customer_name,\
+                                                            device_name = device_name)
+
         # print(EXPORT_PCB_PAD_LOCATION_FILE(PCB_PAD_LOCATION_EXPORT_STATUS))
         # print(EXPORT_IUA_PLUS_FILE(IUA_PLUS_EXPORT_STATUS))
         # print(EXPORT_CRD_PLUS_FILE(CRD_PLUS_EXPORT_STATUS))
@@ -2590,14 +2621,27 @@ def EXPORT_FILES(X_one_Dut, Y_one_Dut, pad_number_list, pad_name_list, options, 
                                                         Y = Y_one_Dut, \
                                                         pad_number_list = pad_number_list, \
                                                         pad_name_list = pad_name_list, \
+                                                        dut_name_list = dut_name_list, \
                                                         xy_input_unit = input_unit, \
                                                         status = ARRAY_FULL_SITE_EXPORT_STATUS, \
                                                         stepping_distance = (0,0), \
+                                                        dut_name_format = dut_name_format, \
                                                         card_part_number=card_part_number, \
                                                         )
             pass
         if options[3] == True:
-            # print(EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE(PROBE_HEAD_XY_FILE_EXPORT_STATUS))
+            EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE(X = X_one_Dut, \
+                                                            Y = Y_one_Dut, \
+                                                            pad_number_list = pad_number_list, \
+                                                            pad_name_list = pad_name_list, \
+                                                            dut_name_list = dut_name_list, \
+                                                            xy_input_unit = input_unit, \
+                                                            status = PROBE_HEAD_XY_FILE_EXPORT_STATUS, \
+                                                            dut_name_format = dut_name_format, \
+                                                            card_part_number=card_part_number, \
+                                                            nc_list = nc_list,
+                                                            customer_name = customer_name,\
+                                                            device_name = device_name)
             pass
         if options[4] == True:
             # print(EXPORT_PCB_PAD_LOCATION_FILE(PCB_PAD_LOCATION_EXPORT_STATUS))

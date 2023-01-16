@@ -8,6 +8,7 @@ import time
 import shutil
 import openpyxl
 from variables import *
+from datetime import datetime
 # from scipy.spatial.distance import euclidean
 
 def GET_XY_FROM_MOUSE(Table):
@@ -617,9 +618,11 @@ def EXPORT_PCB_PAD_LOCATION_FILE():
 def EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE(X, Y, \
                                                 pad_number_list, \
                                                 pad_name_list, \
+                                                dut_name_list, \
                                                 xy_input_unit,  \
                                                 status=[], \
                                                 stepping_distance = [], \
+                                                dut_name_format="", \
                                                 card_part_number="", \
                                                 sheet_name = 'XY list'):
     # Input parameter:
@@ -638,6 +641,7 @@ def EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE(X, Y, \
     if not X or not Y: # not export anything of X and Y list are empty
         # print("empty")
         return "Empty"
+    
     # Declare some variables
     path = ""
     file_exist = False
@@ -685,22 +689,24 @@ def EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE(X, Y, \
                 return "A folder does not exist"
             else:
                 return "Error"
+        
         workbook = openpyxl.load_workbook(new_file_path)
         sheet = workbook[sheet_name]
         
         sheet.cell(4, 3).value = xy_input_unit
+        
         for row in range(len(X)):
-            sheet.cell(row+6, 2).value = X[row]
-            sheet.cell(row+6, 3).value = Y[row]
+            sheet.cell(row+7, 3).value = X[row]
+            sheet.cell(row+7, 4).value = Y[row]
             
             if len(pad_number_list) == len(X):
-                sheet.cell(row+6, 1).value = pad_number_list[row]
+                sheet.cell(row+7, 2).value = pad_number_list[row]
             if len(pad_name_list) == len(X):
-                sheet.cell(row+6, 4).value = pad_name_list[row]
+                sheet.cell(row+7, 5).value = pad_name_list[row]
             if len(dut_name_list) == len(X):
-                sheet.cell(row+6, 0).value = dut_name_list[row]
+                sheet.cell(row+7, 1).value = dut_name_list[row]
             else:
-                sheet.cell(row+6, 0).value = dut_name_format + ".0"
+                sheet.cell(row+7, 1).value = dut_name_format + ".0"
         
         sheet = workbook["Revision"]
         user_name = os.getlogin()
@@ -734,7 +740,7 @@ def EXPORT_ARRAY_FULL_SITE_FOR_REFERENCE_FILE(X, Y, \
                 sheet.cell(row + 1, column - 1).value = "Update"
             
             now = datetime.now()
-            sheet.cell(row+1, column_inde+2).value = now.strtime("%b-%d-%Y")
+            sheet.cell(row+1, column_index+2).value = now.strftime("%b-%d-%Y")
             break
         
         workbook.save(new_file_path)
@@ -750,34 +756,112 @@ def EXPORT_IUA_PLUS_FILE():
 def EXPORT_CRD_PLUS_FILE():
     return "EXPORT_CRD_PLUS_FILE"
 
-def EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE():
-    """
-    # Create a copy version from template for specify device
-    try:
-        shutil.copyfile(PROBE_HEAD_XY_TEMPLATE_FULLPATH, PROBE_HEAD_XY_FULLPATH)
-    except PermissionError:
-        Notification('Error', "This command can not perform. Please check again!")
-        return 0, option
+def EXPORT_PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE(X, \
+                                                        Y, \
+                                                        pad_number_list, \
+                                                        pad_name_list, \
+                                                        dut_name_list, \
+                                                        xy_input_unit,  \
+                                                        status = [], \
+                                                        dut_name_format="", \
+                                                        card_part_number="", \
+                                                        nc_list="", \
+                                                        customer_name="", \
+                                                        device_name=""):
+                                                
+    # Check X and Y list are empty or not
+    if not X or not Y: # not export anything of X and Y list are empty
+        # print("empty")
+        return "Empty"
     
-    # Load workbook
-    workbook = openpyxl.load_workbook(PROBE_HEAD_XY_FULLPATH)
+    # Declare some variables
+    path = ""
+    file_exist = False
+    XY_exist_name = ""
 
-    # Active sheet 
-    sheet = workbook[PROBE_HEAD_XY_SHEETS_NAME[1]]
-    for row in range(1, table_TableWidget.rowCount()):
-        for col in range(1,table_TableWidget.columnCount()+1):
-            if table_TableWidget.item(row, col-1) is None:
-                sheet.cell(row+7, col).value = ""
+    # Get file_name and file_extension from template
+    file_name, file_extension = GET_FILE_PATH('paths.txt', 'PROBE_HEAD_XY_TEMPLATE_FILENAME')
+
+    # Check file does exited or not yet base on card_part_number
+    if card_part_number != "":
+        path = GET_FOLDER_PATH('paths.txt', 'design_folder_path') + "/" + str(card_part_number) + '-xx'
+        if os.path.exists(path):
+            dir_list = os.listdir(path)
+            for i in dir_list:
+                string = card_part_number + "-xx_Probe Head XY Coordinates For Approval" 
+                # string is like: "PCX-000000-xx_Probe Head XY Coordinates For Approval"
+                if (i.find(string) != -1) and (i[i.find(".")+1:] == file_extension):  #if string is included in files list and match file extension
+                    file_exist = True
+                    XY_exist_name = i # get exist file name
+                else: # if string is not included in files list and not match file extension
+                    continue
+            # end for
+        else:
+            return "Card Folder doesn't exist!" # end if
+    else:
+        return "Card part number is empty!"  # alway need card_part_number to add to file, return empty char if this variable is ""
+
+    if file_exist == False: # if file doesn't exist, creating new file Rev01 from template Rev00
+        folder_template_location    = GET_FOLDER_PATH("paths.txt", 'folder_template_path')
+        revision_string_format      = GET_REVISION_STRING('paths.txt', 'REVISION_FORMAT')
+        revision_pos_in_file_name   = file_name.index(revision_string_format)
+        revision_string             = file_name[revision_pos_in_file_name:] # example: Rev00 from template file
+        new_file_path, new_file_name = "", ""
+        
+        if card_part_number != "":
+            new_file_name = file_name.replace("YYY-XXXXXX", card_part_number)
+            new_file_name = new_file_name.replace(new_file_name[revision_pos_in_file_name:], "Rev01")
+            new_file_path = path + "/" + new_file_name + "." + file_extension
+
+        scr = folder_template_location + "/" + file_name + "." + file_extension
+        try:
+            shutil.copyfile(scr, new_file_path)
+        except:
+            if not os.path.exists(new_file_path):
+                return "A folder does not exist"
             else:
-                text = table_TableWidget.item(row, col-1).text()
-                if text.isdigit()==1:
-                    sheet.cell(row+7, col).value = int(text)
-                elif text.replace(".","").replace("-", "").isnumeric():
-                    sheet.cell(row+7, col).value = float(text)
-                else:
-                    sheet.cell(row+7, col).value = text
+                return "Error"
+        print(new_file_path)
+        # Load workbook
+        workbook = openpyxl.load_workbook(new_file_path)
+        # Active sheet 
+        sheet = workbook[PROBE_HEAD_XY_SHEETS_NAME[1]]
+    
+        length = len(X)
+        length_dut = len(dut_name_list)
+        length_pad_name = len(pad_name_list)
+        length_pad_number = len(pad_number_list)
+        length_nc_list = len(nc_list)
+        # Export data to excel file.
+        for row in range(length):
+            sheet.cell(row+8, 3).value = X[row]
+            sheet.cell(row+8, 4).value = Y[row]
+            if length_dut == length:
+                sheet.cell(row+8, 1).value = dut_name_list[row]
+            if length_pad_name == length:
+                sheet.cell(row+8, 5).value = pad_name_list[row]
+            if length_pad_number == length:
+                sheet.cell(row+8, 2).value = pad_number_list[row]
+            if length_nc_list == length:
+                sheet.cell(row+8, 6).value = nc_list[row]
+        
+        sheet.cell(1,2).value = customer_name
+        sheet.cell(2,2).value = device_name
+        sheet.cell(3,2).value = card_part_number
+        sheet.cell(4,2).value = "01"
+        
+        now = datetime.now()
+        sheet.cell(5,2).value = now.strftime("%b-%d-%Y")
 
-    # Save workbook
-    workbook.save(PROBE_HEAD_XY_FULLPATH)
-    """
+        # Active "History of Revision" sheet
+        sheet = workbook[PROBE_HEAD_XY_SHEETS_NAME[0]]
+        # Update data
+        sheet.cell(2,1).value = sheet.cell(5,2).value
+        sheet.cell(3, 2).value = os.getlogin()
+
+        # Save workbook
+        workbook.save(new_file_path)
+    else: # if file does exited
+        return 
+
     return "PROBE_HEAD_XY_COORDINATES_FOR_APPROVAL_FILE"
