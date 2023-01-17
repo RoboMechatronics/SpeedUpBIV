@@ -18,9 +18,9 @@ class MainWindow(QMainWindow):
         super().__init__()      
 
         self.new_project = new_project
-        self.path = ["E:/pnnhien/python_project/my_app_venv_02/app",
-                     "E:/pnnhien/python_project/my_app_venv_02/app",
-                     "E:/pnnhien/python_project/my_app_venv_02/app"]
+        self.paths = ["E:/",
+                     "E:/pnnhien/python_project/my_app_venv_02/app/result/XXX-YYYYYY-xx",
+                     "E:/pnnhien/python_project/my_app_venv_02/app/result/XXX-YYYYYY-xx"]
 
         # Variables to store XY coordinates list
         self.X, self.Y = [], []
@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         self.X_list_pattern, self.Y_list_pattern = [], []
         
         # Inital input data unit
+
         self.XY_INPUT_UNIT          = MM_UNIT
         self.XY_INPUT_UNIT_PREVIOUS = ""
         self.STEPPING_DISTANCE_UNIT = UM_UNIT
@@ -80,7 +81,7 @@ class MainWindow(QMainWindow):
         self.table                  = TableWindow()
         chart                       = Chart(width=5, height=4, dpi=100)
         self.CHART, self.toolbar    = SCATTER_CHART(self.X, self.Y, chart, self.NC_LIST, self.NC_DENOTE)
-        self.Tab_content            = Tab_Widget(self, self.table, self.CHART, self.toolbar, self.path)
+        self.Tab_content            = Tab_Widget(self, self.table, self.CHART, self.toolbar, self.paths)
 
         # Create table in tab2 according to XY list SV format
         self.table_tab2     = TableWindow(NumRow=0, NumCol=0)
@@ -1087,30 +1088,30 @@ class Tab_Widget(QWidget):
         
         self.path_textbox = QLineEdit()
         self.path_textbox.setText(self.path)
-        # self.path_textbox.textChanged.connect(self.path_tab1_textchanged)
+        self.path_textbox.textChanged.connect(self.path_tab1_textchanged)
         
         self.path_tab2_left_textbox = QLineEdit()
         self.path_tab2_left_textbox.setText(self.path_left)
-        # self.path_tab2_left_textbox.textChanged.connect(self.path_tab2_left_textchanged)
+        self.path_tab2_left_textbox.textChanged.connect(self.path_tab2_left_textchanged)
         
         self.path_tab2_right_textbox = QLineEdit()
         self.path_tab2_right_textbox.setText(self.path_right)
-        # self.path_tab2_right_textbox.textChanged.connect(self.path_tab2_right_textchanged)
+        self.path_tab2_right_textbox.textChanged.connect(self.path_tab2_right_textchanged)
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(folder_tabs)
 
-        path_label = QLabel("Device path:")
-        path_label_tab2_left = QLabel("SOLIDWORKS PDM path:")
-        path_label_tab2_right = QLabel("Release files path:")
+        path_label              = QLabel("Device path:")
+        path_label_tab2_left    = QLabel("SOLIDWORKS PDM:")
+        path_label_tab2_right   = QLabel("Release files:")
         
         path_hboxlayout  = QHBoxLayout()
         path_hboxlayout.addWidget(path_label)
         path_hboxlayout.addWidget(self.path_textbox)
 
-        self.tree1 = self.TreeWidget()
-        self.tree2 = self.TreeWidget()
-        self.tree3 = self.TreeWidget()
+        self.tree1 = self.TreeWidget(self.path_textbox.text(), index = "")
+        self.tree2 = self.TreeWidget(self.path_tab2_left_textbox.text())
+        self.tree3 = self.TreeWidget(self.path_tab2_right_textbox.text(), index = "")
 
         self.tab1_layout = QVBoxLayout()
         self.tab1_layout.addLayout(path_hboxlayout)
@@ -1124,7 +1125,7 @@ class Tab_Widget(QWidget):
         tab2_right_frame.setFrameShape(QFrame.StyledPanel)
         
         self.tab2_left_sublayout    = QHBoxLayout()
-        self.tab2_right_sublayout   =QHBoxLayout()
+        self.tab2_right_sublayout   = QHBoxLayout()
         self.tab2_left_sublayout.addWidget(path_label_tab2_left)
         self.tab2_left_sublayout.addWidget(self.path_tab2_left_textbox)
         self.tab2_right_sublayout.addWidget(path_label_tab2_right)
@@ -1159,76 +1160,126 @@ class Tab_Widget(QWidget):
         
         return main_layout
     
-    # def path_tab1_textchanged(self):
-    #     self.path = self.path_textbox.text()
-    #     if self.path != "":
-    #         if os.path.exists(self.path):
-    #             self.tab1_layout.removeWidget(self.tree1)
-    #             del self.tree1
-    #             self.tree1 = self.TreeView(self.path)
-    #             self.tab1_layout.addWidget(self.tree1)
-    #     return
+    def path_tab1_textchanged(self):
+        return
     
-    # def path_tab2_left_textchanged(self):
-    #     self.path_left = self.path_tab2_left_textbox.text()
-    #     if self.path_left != "":
-    #         if os.path.exists(self.path_left):
-    #             self.tab2_left_layout.removeWidget(self.tree2)
-    #             del self.tree2
-    #             self.tree2 = self.TreeView(self.path_left)
-    #             self.tab2_left_layout.addWidget(self.tree2)
-    #     return
+    def path_tab2_left_textchanged(self):
+        self.tab2_left_layout.removeWidget(self.tree2)
+        self.tree2.deleteLater()
+        self.tree2 = self.TreeWidget(self.path_tab2_left_textbox.text())
+        self.tab2_left_layout.addWidget(self.tree2)
+        return
     
-    # def path_tab2_right_textchanged(self):
-    #     self.path_right = self.path_tab2_right_textbox.text()
-    #     if self.path_right != "":
-    #         if os.path.exists(self.path_right):
-    #             self.tab2_right_layout.removeWidget(self.tree3)
-    #             del self.tree3
-    #             self.tree3 = self.TreeView(self.path_right)
-    #             self.tab2_right_layout.addWidget(self.tree3)
-    #     return
+    def path_tab2_right_textchanged(self):
+        self.tab2_right_layout.removeWidget(self.tree3)
+        self.tree3.deleteLater()
+        self.tree3 = self.TreeWidget(self.path_tab2_right_textbox.text())
+        self.tab2_right_layout.addWidget(self.tree3)
+        return
     
-    def TreeWidget(self):
-        # model = QFileSystemModel()
-        # model.setRootPath(path)
-
+    def TreeWidget(self, path, index="SOLIDWORKS"):
         tree = QTreeWidget()
-        # tree.setModel(model)
-        tree.setColumnCount(2)
-        tree.setColumnWidth(0, 150)
-        tree.setColumnWidth(1, 150)
-        tree.setHeaderLabels(['Part Number', 'Files', 'Status'])
-
-        part_numbers = ['401-XXXXXX-01','PCX-000000-xx','LGP-000000-01']
-        employees = {
-            '401-XXXXXX-01': ['401-XXXXXX-01.sldprt','401-XXXXXX-01.slddrw'],
-            'PCX-000000-xx': ['PCX-000000-xx.sldasm','PCX-000000-xx.slddrw'],
-            'LGP-000000-01': ['LGP-000000-01.sldprt','LGP-000000-01.slddrw'],
-        }
-        status = {
-            '401-XXXXXX-01': ['Pass', 'Pass'],
-            'PCX-000000-xx': ['Pass', 'Pass'],
-            'LGP-000000-01': ['Pass', 'Pass'],
-        }
-        
-        # addition data to the tree
-        for part_number in part_numbers:
-            part_item = QTreeWidgetItem(tree)
-            part_item.setText(0, part_number)
-            # set the child
-            for employee in employees[part_number]:
-                employee_item   = QTreeWidgetItem(tree)
-                employee_item.setText(1, employee)
-
-                part_item.addChild(employee_item)
-
         tree.setStyleSheet("""QTreeWidget {
                                 color: rgb(255,255,255);
                                 background-color: rgba(255,255,255,0);
                                 font: 15px 3ds;
                             }""")
+                            
+        tree.header().setSectionResizeMode(QHeaderView.ResizeToContents)
+        
+        SOLIDWORKS_extension = ["SLDPRT", "SLDASM", "SLDDRW"]
+        VIEW_extension = ["PDF", "DXF"]
+        SOLIDWORKS = None
+        
+        if index == "SOLIDWORKS":
+            SOLIDWORKS = True
+        else:
+            SOLIDWORKS = False
 
+        if not os.path.exists(path) or path == "":
+            return tree
+
+        # tree.setModel(model)
+        tree.setColumnCount(2)
+        tree.setColumnWidth(0, 150)
+        tree.setColumnWidth(1, 150)
+        tree.setHeaderLabels(['Part Number', 'File name','Type'])
+
+        dir_list = os.listdir(path)
+        
+        SW_part_numbers = []
+        View_part_numbers = []
+        for name in dir_list:
+            name = name.upper()
+            if SOLIDWORKS == True:
+                if name[11:14] == "PCB" and (name[name.rfind(".")+1:] == SOLIDWORKS_extension[0] or name[name.rfind(".")+1:] == SOLIDWORKS_extension[1] or name[name.rfind(".")+1:] == SOLIDWORKS_extension[2]):
+                    SW_part_numbers.append(name[:15])
+                elif name[11:14] != "PCB" and (name[name.rfind(".")+1:] == SOLIDWORKS_extension[0] or name[name.rfind(".")+1:] == SOLIDWORKS_extension[1] or name[name.rfind(".")+1:] == SOLIDWORKS_extension[2]):
+                    SW_part_numbers.append(name[:13])
+
+            else:
+                if name[11:14] == "PCB" and \
+                        (name[name.rfind(".")+1:] == VIEW_extension[0] or \
+                         name[name.rfind(".")+1:] == VIEW_extension[1]):
+                    View_part_numbers.append(name[:15])
+                elif name[11:14] != "PCB" and \
+                        (name[name.rfind(".")+1:] == VIEW_extension[0] or \
+                         name[name.rfind(".")+1:] == VIEW_extension[1]):
+                    View_part_numbers.append(name[:13])
+
+        SW_part_numbers = list(dict.fromkeys(SW_part_numbers))
+        View_part_numbers = list(dict.fromkeys(View_part_numbers))
+
+        SW_elements = []
+        elements = []
+        for part_name in SW_part_numbers:
+            sub_element_list = []
+            for name in dir_list:
+                name = name.upper()
+                if (name[:13] == part_name or name[:15] == part_name) and \
+                                                                            (name[name.rfind(".")+1:] == SOLIDWORKS_extension[0] or \
+                                                                                name[name.rfind(".")+1:] == SOLIDWORKS_extension[1] or \
+                                                                                name[name.rfind(".")+1:] == SOLIDWORKS_extension[2]):
+                    sub_element_list.append(name)
+                
+            elements.append(sub_element_list)
+        SW_elements = dict(zip(SW_part_numbers, elements))
+    
+        View_elements = []
+        elements = []
+        for part_name in View_part_numbers:
+            sub_element_list = []
+            for name in dir_list:
+                name = name.upper()
+                if (name[:13] == part_name or name[:15] == part_name) and \
+                                                                        (name[name.rfind(".")+1:] == VIEW_extension[0] or \
+                                                                        name[name.rfind(".")+1:] == VIEW_extension[1]):
+                    sub_element_list.append(name)
+
+            elements.append(sub_element_list)
+        View_elements = dict(zip(View_part_numbers, elements))
+
+        if index == "SOLIDWORKS":
+            part_numbers = SW_part_numbers
+            elements = SW_elements
+        else:
+            part_numbers = View_part_numbers
+            elements = View_elements
+
+        # addition data to the tree
+        for part_number in part_numbers:
+            part_item = QTreeWidgetItem(tree)
+            part_item.setText(0, part_number)
+            # set the child
+            for element in elements[part_number]:
+                element_item   = QTreeWidgetItem(tree)
+                element_item.setText(1, element)
+                part_item.addChild(element_item)
+                # if element[element.rfind(".")+1:] == SOLIDWORKS_extension[0] or element[element.rfind(".")+1:] == SOLIDWORKS_extension[1] or element[element.rfind(".")+1:] == SOLIDWORKS_extension[2]:
+                #     element_item1   = QTreeWidgetItem(tree)
+                #     element_item1.setText(2, "SOLIDWORKD Document")
+                #     part_item.addChild(element_item1)
+        
         return tree
 
 # End of Tab class #
