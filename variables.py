@@ -28,6 +28,8 @@ CHART_TOOL = "&Chart tools"
 EDIT_TOOL = "&Edit tools"
 EXPORT_TOOLS = "Export Tools"
 #---------------------------------------------------------------------------------------------------#
+SOLIDWORKS_extension = ["SLDPRT", "SLDASM", "SLDDRW"]
+VIEW_extension = ["PDF", "DXF"]
 
 CARD_PART_NUMBER = {
     "LABEL": "", # QLabel on main window
