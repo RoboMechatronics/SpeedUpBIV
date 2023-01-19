@@ -1097,7 +1097,15 @@ class Tab_Widget(QWidget):
         self.path_tab2_right_textbox = QLineEdit()
         self.path_tab2_right_textbox.setText(self.path_right)
         self.path_tab2_right_textbox.textChanged.connect(self.path_tab2_textchanged)
-
+        
+        other_items_list_label = QLabel("Other things in right folder")
+        other_items_list_label.setStyleSheet("""
+                                            QLabel{
+                                                color: white;
+                                                background-color: rgba(0,0,0,0);
+                                                font: 15px 3ds;
+                                                }
+                                                """)
         self.other_items_list = QListWidget()
         self.other_items_list.setResizeMode(QListView.Fixed)
         self.other_items_list.setStyleSheet("""
@@ -1107,7 +1115,7 @@ class Tab_Widget(QWidget):
                                                 background-color:  rgba(0,0,0,0);
                                                 border:            1px solid white;
                                                 border-radius:     5px;
-                                                font:              15px Courier New;
+                                                font:              12px 3ds;
                                             }
                                             QListWidget::item::selected
                                             {
@@ -1119,8 +1127,8 @@ class Tab_Widget(QWidget):
         main_layout.addWidget(folder_tabs)
 
         path_label              = QLabel("Device path:")
-        path_label_tab2_left    = QLabel("SOLIDWORKS PDM:")
-        path_label_tab2_right   = QLabel("Release files:")
+        path_label_tab2_left    = QLabel("SOLIDWORKS files:")
+        path_label_tab2_right   = QLabel("PDF/DXF files:")
         
         path_hboxlayout  = QHBoxLayout()
         path_hboxlayout.addWidget(path_label)
@@ -1139,7 +1147,7 @@ class Tab_Widget(QWidget):
         self.tree3 = self.TreeWidget(self.parent, self.tree3_data)
 
         self.tab1_layout = QVBoxLayout()
-        self.tab1_layout.addLayout(path_hboxlayout)
+        # self.tab1_layout.addLayout(path_hboxlayout)
         # self.tab1_layout.addWidget(self.tree1)
         tab1.setLayout(self.tab1_layout)
         
@@ -1175,7 +1183,8 @@ class Tab_Widget(QWidget):
 
         frame = QFrame()
         frame.setFixedHeight(150)
-        other_item_list_layout = QHBoxLayout()
+        other_item_list_layout = QVBoxLayout()
+        other_item_list_layout.addWidget(other_items_list_label)
         other_item_list_layout.addWidget(self.other_items_list)
         frame.setLayout(other_item_list_layout)
         list_layout = QHBoxLayout()
@@ -1274,9 +1283,9 @@ class Tab_Widget(QWidget):
         tree.setColumnCount(2)
         tree.setColumnWidth(0, 150)
         tree.setColumnWidth(1, 150)
-        tree.setHeaderLabels(['Part Number', 'File name'])
+        tree.setHeaderLabels(['Part Number/File name', 'Status'])
 
-        # addition data to the tree
+        # # addition data to the tree
         for part_number in parents_list:
             part_item = QTreeWidgetItem(tree)
             part_item.setText(0, part_number)
@@ -1285,7 +1294,12 @@ class Tab_Widget(QWidget):
                 element_item   = QTreeWidgetItem(tree)
                 element_item.setText(1, element)
                 part_item.addChild(element_item)
-
+        # for part_number in parents_list:
+        #     part_item = QTreeWidgetItem(tree)
+        #     part_item.setText(0, part_number)
+        #     # Set the childs
+        #     element_item   = QTreeWidgetItem(items_list[part_number])
+        #     part_item.addChild(element_item)
         return tree
 
     def Get_Other_files(self, path_right, SW_part_numbers):
@@ -1328,7 +1342,7 @@ class Tab_Widget(QWidget):
                     name[:2] != "~$" and name[name.rfind(".")+1:] != "INI" and \
                 (name[name.rfind(".")+1:] != VIEW_extension[0] and \
                  name[name.rfind(".")+1:] != VIEW_extension[1]):
-                 other_files_not_include.append(file_name)
+                 other_files_not_include.append(file_name.upper())
              
         other_files_not_include = list(dict.fromkeys(other_files_not_include))
         return other_files_not_include
