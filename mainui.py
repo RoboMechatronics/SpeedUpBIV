@@ -1092,11 +1092,11 @@ class Tab_Widget(QWidget):
         
         self.path_tab2_left_textbox = QLineEdit()
         self.path_tab2_left_textbox.setText(self.path_left)
-        self.path_tab2_left_textbox.textChanged.connect(self.path_tab2_left_textchanged)
+        self.path_tab2_left_textbox.textChanged.connect(self.path_tab2_textchanged)
         
         self.path_tab2_right_textbox = QLineEdit()
         self.path_tab2_right_textbox.setText(self.path_right)
-        self.path_tab2_right_textbox.textChanged.connect(self.path_tab2_right_textchanged)
+        self.path_tab2_right_textbox.textChanged.connect(self.path_tab2_textchanged)
 
         self.other_items_list = QListWidget()
         self.other_items_list.setResizeMode(QListView.Fixed)
@@ -1199,9 +1199,12 @@ class Tab_Widget(QWidget):
         if not os.path.exists(path_left) or not os.path.exists(path_right):
             return "Error"
         else:
-            dir_list_left = os.listdir(path_left)
-            dir_list_right = os.listdir(path_right)
-        
+            try:
+                dir_list_left = os.listdir(path_left)
+                dir_list_right = os.listdir(path_right)
+            except:
+                return
+
         SW_part_numbers_full = []
         for name in dir_list_left:
             name = name.upper()
@@ -1296,12 +1299,16 @@ class Tab_Widget(QWidget):
         for part_name in SW_part_numbers:
             for name in dir_list:
                 name = name.upper()
-                if (name[:13] != part_name) and (name[name.rfind(".")+1:] != SOLIDWORKS_extension[0] and \
-                                                name[name.rfind(".")+1:] != SOLIDWORKS_extension[1] and \
-                                                name[name.rfind(".")+1:] != SOLIDWORKS_extension[2]) and \
-                                                name[:2] != "~$":
+                if (name[:13] != part_name) and \
+                    (name[name.rfind(".")+1:] != SOLIDWORKS_extension[0] and \
+                     name[name.rfind(".")+1:] != SOLIDWORKS_extension[1] and \
+                     name[name.rfind(".")+1:] != SOLIDWORKS_extension[2]) and \
+                    name[:2] != "~$" and name[name.rfind(".")+1:] != "INI":
+                    # if true
                     other_files.append(name)
-        
+                else:
+                    pass
+
         # Remove duplicate elements
         other_files = list(dict.fromkeys(other_files))
         other_files_not_include = []
@@ -1312,41 +1319,44 @@ class Tab_Widget(QWidget):
                     count = count + 1
             if count == len(SW_part_numbers):
                 other_files_not_include.append(name)
-            del count
-
-        # other_files = list(dict.fromkeys(self.other_files))
-
+           
+        for file_name in dir_list:
+            name = file_name.upper()
+            if (name[name.rfind(".")+1:] != SOLIDWORKS_extension[0] and \
+                     name[name.rfind(".")+1:] != SOLIDWORKS_extension[1] and \
+                     name[name.rfind(".")+1:] != SOLIDWORKS_extension[2]) and \
+                    name[:2] != "~$" and name[name.rfind(".")+1:] != "INI" and \
+                (name[name.rfind(".")+1:] != VIEW_extension[0] and \
+                 name[name.rfind(".")+1:] != VIEW_extension[1]):
+                 other_files_not_include.append(file_name)
+             
+        other_files_not_include = list(dict.fromkeys(other_files_not_include))
         return other_files_not_include
     
     def path_tab1_textchanged(self):
         return
     
-    def path_tab2_left_textchanged(self):
+    def path_tab2_textchanged(self):
         if not os.path.exists(self.path_tab2_left_textbox.text()) or not os.path.exists(self.path_tab2_right_textbox.text()):
             return
-
-        self.other_items_list.clear()
-        self.tab2_right_layout.removeWidget(self.tree2)
-        self.path_tab2_right_textchanged()
-
-        return
-    
-    def path_tab2_right_textchanged(self):
-        if not os.path.exists(self.path_tab2_left_textbox.text()) or not os.path.exists(self.path_tab2_right_textbox.text()):
-            return
+            
         self.other_items_list.clear()
         self.tab2_right_layout.removeWidget(self.tree3)
+        self.tab2_left_layout.removeWidget(self.tree2)
 
         self.parent, self.tree2_data, self.tree3_data = self.GetTreeElements(self.path_tab2_left_textbox.text(), self.path_tab2_right_textbox.text())
         
+        self.tree2 = self.TreeWidget(self.parent, self.tree2_data)
         self.tree3 = self.TreeWidget(self.parent, self.tree3_data)
         self.tab2_right_layout.addWidget(self.tree3)
+        self.tab2_left_layout.addWidget(self.tree2)
 
         other_files = self.Get_Other_files(self.path_tab2_right_textbox.text(), self.parent)
+        
         if other_files:
             for i, file_ in enumerate(other_files):
                 self.other_items_list.insertItem(i, file_)
-
+        
         return
 # End of Tab class #
 
